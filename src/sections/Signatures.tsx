@@ -1,0 +1,136 @@
+import { useRef } from 'react'
+import { Cup } from '../components/art/Cup'
+import { btn } from '../components/ui/button'
+import { MenuGlyph } from '../components/ui/glyphs'
+import { PriceTags } from '../components/ui/PricePills'
+import { sticker } from '../components/ui/sticker'
+import { MENU_ITEM_COUNT } from '../data/menu'
+import { SIGNATURES } from '../data/signatures'
+import { useReducedMotion } from '../hooks/useMedia'
+import { gsap, useGSAP } from '../lib/gsap'
+import { scrollToTarget } from '../lib/lenis'
+import { cn, toArabicDigits } from '../lib/utils'
+
+const SIZES = ['شوب', 'شبح', 'زجاجة ٩٠٠']
+
+/** "أساطير مكة" — pinned horizontal gallery of the signature (الجديد × جديد) drinks. */
+export function Signatures() {
+  const root = useRef<HTMLElement>(null)
+  const reduced = useReducedMotion()
+
+  useGSAP(
+    () => {
+      if (reduced) return
+      const track = root.current!.querySelector<HTMLElement>('.sig-track')!
+      const distance = () => Math.max(0, track.scrollWidth - window.innerWidth)
+
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: {
+          trigger: root.current,
+          start: 'top top',
+          end: () => `+=${distance()}`,
+          pin: true,
+          scrub: 0.8,
+          invalidateOnRefresh: true,
+        },
+      })
+      // page is RTL: the track overflows to the left, so it travels right.
+      // Perf (measured): each card is its own pre-rastered layer and nothing inside it animates while the
+      // track moves — the old per-frame cup sway + a CSS blur glow kept re-rastering cards (~30 fps → 60 fps).
+      tl.to(track, { x: () => distance() }, 0).to('.sig-progress', { scaleX: 1 }, 0)
+    },
+    { scope: root, dependencies: [reduced] },
+  )
+
+  return (
+    <section
+      ref={root}
+      id="signatures"
+      aria-label="أساطير مكة"
+      className={cn('relative overflow-hidden bg-forest-950', reduced ? 'py-24' : 'h-svh')}
+    >
+      <div aria-hidden className="doodles absolute inset-0 opacity-[0.035]" />
+      <div className={cn('relative flex h-full flex-col justify-center', reduced && 'overflow-x-auto')}>
+        <div className="sig-track flex w-max items-center gap-5 px-5 md:gap-8 md:px-[6vw]">
+          <div className="flex w-[82vw] shrink-0 flex-col justify-center md:w-[34vw]">
+            <p className="mb-3 text-sm font-bold tracking-widest text-lime">الجديد × جديد</p>
+            <h2 className={sticker('lime', 'light', 'text-[clamp(3rem,7vw,6.5rem)] leading-[1.2] font-extrabold')}>أساطير مكة</h2>
+            <p className="mt-5 max-w-md text-lg text-cream/70 md:text-xl">
+              أسامي اتعملت في مكة ومحدش عرف يقلّدها… كل واحد فيهم ليه جمهوره.
+            </p>
+            <p className="mt-8 flex items-center gap-3 text-cream/60">
+              <span className="inline-block h-px w-12 bg-cream/40" />
+              اسكرول وهي هتعدي قدامك
+            </p>
+          </div>
+
+          {SIGNATURES.map((s, n) => (
+            <article
+              key={s.name}
+              className="group @container relative flex h-[min(70svh,660px)] w-[78vw] shrink-0 flex-col overflow-hidden rounded-[2.5rem] border-[3px] border-cream/90 p-6 shadow-[0_8px_0_rgba(4,32,15,0.55)] will-change-transform sm:w-[380px] md:p-8"
+              style={{ background: s.bg, color: s.ink }}
+            >
+              {/* backdrop, painted once (the card is its own layer): sun rays behind the cup + the drink's name
+                  printed tone-on-tone like a juice wrapper — outlined / filled / outlined, sized to the card */}
+              <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+                <div className="absolute top-[47%] left-1/2 aspect-square w-[175%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[repeating-conic-gradient(rgba(255,255,255,0.24)_0deg_7deg,transparent_7deg_15deg)] [mask-image:radial-gradient(closest-side,#000_18%,transparent_70%)]" />
+                <div className="absolute inset-x-[-40%] top-[19%] flex -rotate-[9deg] flex-col items-center text-[24cqw] leading-[1.15] font-extrabold">
+                  {[0, 1, 2].map((r) => (
+                    <p
+                      key={r}
+                      className={cn('whitespace-nowrap', r === 1 ? 'opacity-[0.12]' : 'text-outline opacity-[0.22]')}
+                      style={{ translate: `${(r - 1) * 18}% 0` }}
+                    >
+                      {[s.name, s.name, s.name].join('  ·  ')}
+                    </p>
+                  ))}
+                </div>
+              </div>
+              <div className="relative flex items-start justify-between">
+                <span className="text-outline text-6xl leading-none font-extrabold opacity-40 md:text-7xl">
+                  ٠{toArabicDigits(n + 1)}
+                </span>
+                <span className="rounded-full bg-black/10 px-3 py-1 text-xs font-bold">من أساطير مكة</span>
+              </div>
+              <div className="relative -my-2 flex flex-1 items-center justify-center">
+                <div aria-hidden className="absolute size-[80%] rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.4),transparent)]" />
+                <div className="sig-cup relative h-full max-h-[320px]">
+                  <Cup
+                    layers={s.layers}
+                    bubbles={false}
+                    className="h-full w-auto transition-transform duration-700 ease-(--ease-squish) group-hover:scale-105 group-hover:-rotate-6"
+                    title={`كوباية ${s.name}`}
+                  />
+                </div>
+              </div>
+              {/* sized to the card (cqw) so the longest name («أبو السلاطين») still fits on one line */}
+              <h3 className={sticker('cream', 'dark', 'relative text-[min(3.2rem,15cqw)] leading-[1.3] font-extrabold whitespace-nowrap')}>{s.name}</h3>
+              <p className="relative mb-4 text-lg font-semibold opacity-80">{s.tagline}</p>
+              <div className="relative flex items-end justify-between gap-3">
+                <PriceTags prices={s.prices} sizes={SIZES} surface="card" />
+                <span className="pb-5 text-xs font-bold opacity-60">جنيه</span>
+              </div>
+            </article>
+          ))}
+
+          <div className="flex h-[min(68svh,640px)] w-[78vw] shrink-0 flex-col items-start justify-center rounded-[2.5rem] border-2 border-dashed border-lime/40 p-8 sm:w-[380px]">
+            <p className="text-[clamp(2.4rem,4vw,3.4rem)] leading-tight font-extrabold text-cream">
+              ولسه فيه <span className={sticker('lime', 'light')}>{toArabicDigits(MENU_ITEM_COUNT)}+</span> صنف تاني
+            </p>
+            <button type="button" onClick={() => scrollToTarget('#menu')} className={btn('lime', 'lg', 'mt-8')}>
+              <MenuGlyph />
+              افتح المنيو
+            </button>
+          </div>
+        </div>
+
+        {!reduced && (
+          <div className="absolute inset-x-5 bottom-6 h-1 overflow-hidden rounded-full bg-white/10 md:inset-x-[6vw]">
+            <div className="sig-progress h-full origin-right scale-x-0 rounded-full bg-lime" />
+          </div>
+        )}
+      </div>
+    </section>
+  )
+}

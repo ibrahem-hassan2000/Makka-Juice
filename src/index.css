@@ -1,0 +1,271 @@
+@import '@fontsource-variable/baloo-bhaijaan-2';
+@import 'tailwindcss';
+
+/* ───────────────── Makka design tokens (docs/02-brand-identity.md) ───────────────── */
+@theme {
+  --font-sans: 'Baloo Bhaijaan 2 Variable', 'Baloo Bhaijaan 2', system-ui, 'Segoe UI', Tahoma, sans-serif;
+
+  --color-forest-950: #04200f;
+  --color-forest-900: #062e18;
+  --color-forest-800: #0b4a2e;
+  --color-forest-700: #11603a;
+  --color-leaf-600: #2f8f3f;
+  --color-leaf-500: #46a843;
+  --color-leaf-400: #5cb646;
+  --color-leaf-300: #8fd16f;
+  --color-lime: #c6f36b;
+  --color-mango: #f7a531;
+  --color-berry: #e8505b;
+  --color-straw: #f48fb1;
+  --color-cream: #fff8e7;
+  --color-cocoa: #4a2c1d;
+
+  --ease-juice: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-squish: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --animate-wave: wave 2.4s linear infinite;
+  --animate-wave-slow: wave 4.2s linear infinite;
+  --animate-bubble: bubble 3.2s ease-in infinite;
+  --animate-spin-slow: spin 18s linear infinite;
+
+  @keyframes wave {
+    to {
+      transform: translateX(-120px);
+    }
+  }
+  @keyframes bubble {
+    0% {
+      transform: translateY(0) scale(0.6);
+      opacity: 0;
+    }
+    15% {
+      opacity: 0.9;
+    }
+    100% {
+      transform: translateY(-260px) scale(1.1);
+      opacity: 0;
+    }
+  }
+}
+
+/* ───────────────── Base ───────────────── */
+@layer base {
+  /* Sticky UI sits under the header — and slides up with it when the header hides (Header.tsx sets data-nav) */
+  :root {
+    --nav-offset: 76px;
+    @media (width >= 48rem) {
+      --nav-offset: 88px;
+    }
+  }
+  :root[data-nav='hidden'] {
+    --nav-offset: 0px;
+  }
+  html {
+    background: var(--color-forest-900);
+    color: var(--color-cream);
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+  }
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  .lenis.lenis-smooth [data-lenis-prevent] {
+    overscroll-behavior: contain;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+  body {
+    font-family: var(--font-sans);
+    overflow-x: clip;
+  }
+  ::selection {
+    background: var(--color-lime);
+    color: var(--color-forest-900);
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-lime);
+    outline-offset: 3px;
+    border-radius: 8px;
+  }
+}
+
+/* ───────────────── Utilities ───────────────── */
+@utility text-outline {
+  -webkit-text-stroke: 2px currentColor;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Fruit doodle pattern (like the back of the printed menu) */
+@utility doodles {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' fill='none' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='40' cy='42' r='18'/%3E%3Cpath d='M40 24v36M22 42h36M28 30l24 24M52 30 28 54'/%3E%3Cpath d='M150 30c18 0 30 14 26 32-3 14-18 22-30 16-14-7-16-27-6-40'/%3E%3Cpath d='M160 26c2-8 8-12 14-12'/%3E%3Cpath d='M70 140c10 30 50 42 76 20-24 8-54 0-66-26z'/%3E%3Cpath d='M170 150c-10-14-4-30 12-32 16 2 20 22 8 32l-10 8z'/%3E%3Cpath d='M182 118c-2-6 2-12 8-12'/%3E%3Cpath d='M30 180c6-18 26-24 40-12-10 16-26 22-40 12zM30 180l40-12'/%3E%3C/svg%3E");
+  background-size: 220px 220px;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Makka sticker type — the footer wordmark look: juicy fill, outline, hard edge underneath.
+   Presets live in components/ui/sticker.ts; tune per use with the --st-* variables. */
+@utility sticker-text {
+  color: var(--st-fill, var(--color-lime));
+  -webkit-text-stroke: var(--st-line, 0.07em) var(--st-stroke, var(--color-cream));
+  paint-order: stroke fill;
+  text-shadow: 0 var(--st-drop, 0.07em) 0 var(--st-edge, var(--color-forest-900));
+}
+
+/* Liquid text: juice sloshing inside the letters */
+@utility liquid-text {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--color-lime);
+  background-image:
+    /* preserveAspectRatio=none: the tile is stretched to 200% of the text height. Without it the SVG was
+       letter-boxed, leaving an empty band under the wave (the "gap at the bottom" of 17370). */
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='400' viewBox='0 0 240 400' preserveAspectRatio='none'%3E%3Cpath d='M0 200 Q30 180 60 200 T120 200 T180 200 T240 200 V400 H0Z' fill='%23c6f36b'/%3E%3C/svg%3E");
+  background-repeat: repeat-x;
+  background-size: 240px 200%;
+  background-position: 0 var(--fill, 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: liquid-x 3s linear infinite;
+}
+
+@keyframes liquid-x {
+  to {
+    background-position-x: 240px;
+  }
+}
+
+/* SplitText word masks: extra room so Arabic dots and descenders (ي ج ق ر) are never clipped.
+   Padding + equal negative margin = bigger clip box, identical layout. */
+.split-word-mask {
+  padding: 0.12em 0.08em 0.32em;
+  margin: -0.12em -0.08em -0.32em;
+}
+
+/* off-screen hero: freeze its CSS loops (liquid waves, bubbles, scroll-hint bounce) */
+.is-idle * {
+  animation-play-state: paused !important;
+}
+
+/* map city pulse — animates the individual `scale` property so it composes with the Tailwind translate */
+@keyframes pulse-ring {
+  0% {
+    scale: 0.8;
+    opacity: 0.7;
+  }
+  100% {
+    scale: 2.4;
+    opacity: 0;
+  }
+}
+
+/* gentle idle bob for decorative fruit (compositor-only transform) */
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-5deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(5deg);
+  }
+}
+
+/* seamless loop for a periodic shape drawn at 200% width */
+@keyframes slide-half {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes branch-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+}
+
+/* one-shot ring burst (map city reached) */
+@keyframes ring-burst {
+  0% {
+    scale: 0.4;
+    opacity: 0.9;
+  }
+  100% {
+    scale: 3.2;
+    opacity: 0;
+  }
+}
+
+/* scooter exhaust puffs */
+@keyframes puff {
+  0% {
+    transform: translate(0, 0) scale(0.4);
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate(-26px, -8px) scale(1.4);
+    opacity: 0;
+  }
+}
+
+/* a lifted bottle cap hovering over its bottle */
+@keyframes cap-hover {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-9%) rotate(4deg);
+  }
+}
+
+/* little boat on the map sea */
+@keyframes rock {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(4deg);
+  }
+}
+
+/* 17370 juicy digits: each digit filled with its own fruit (tile + colour set per digit) */
+.juicy-fill {
+  color: transparent;
+  background: var(--tile) 0 0 / 0.34em 0.34em, var(--juice);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 0.05em var(--color-cream);
+}
+.juicy-edge {
+  color: var(--color-forest-950);
+  -webkit-text-stroke: 0.05em var(--color-forest-950);
+  translate: 0 0.07em;
+}
+/* story counters count up in plain ink, then turn into juice (Story.tsx adds .is-juicy) */
+.stat-num:not(.is-juicy) .juicy-fill {
+  color: inherit;
+  background: none;
+  -webkit-text-stroke: 0;
+}
+.stat-num:not(.is-juicy) .juicy-edge {
+  visibility: hidden;
+}
+
+/* Honour the OS setting — everything still renders in its final state */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
