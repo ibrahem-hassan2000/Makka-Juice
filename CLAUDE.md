@@ -4,7 +4,8 @@ Spec pitch site for an Alexandria juice chain. Not approved by the client yet. *
 
 - Stack: Vite 8 · React 19 · TS · Tailwind 4 (`@theme` tokens in `src/index.css`) · GSAP 3.15 (+ScrollTrigger/SplitText/DrawSVG) · Lenis · Motion.
 - RTL Arabic page (`<html lang="ar" dir="rtl">`). Horizontal scroll moves **right** in RTL.
-- Content lives only in `src/data/*` (menu, brand/branches, signatures). Artwork is hand-built SVG in `src/components/art`.
+- Content lives only in `src/data/*` (menu, brand/branches, signatures). Fruit decoration + cups are **3D renders**
+  from `tools/render` (three.js studio → `src/assets/render/*.webp`, docs/10); icons/map/bottles are SVG in `src/components/art`.
 - Current design = v1 (SVG juice-builds-itself hero, Baloo Bhaijaan 2). A cinematic v2 was tried and reverted by the
   user — don't reintroduce it unless asked.
 - GSAP gotchas: never put Tailwind `translate-*` classes on elements GSAP animates (GSAP reads them as px offsets —

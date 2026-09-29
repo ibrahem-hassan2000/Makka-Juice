@@ -15,6 +15,7 @@ afterwards jump to what you need. **Keep these files updated** — every session
 | 07 | [roadmap.md](07-roadmap.md) | Pitch → approval → production → v2 ideas |
 | 08 | [changelog.md](08-changelog.md) | Dated log of every working session |
 | 09 | [pitch-notes.md](09-pitch-notes.md) | How to present the concept to Makka |
+| 10 | [3d-renders.md](10-3d-renders.md) | The 3D render studio: realistic fruit, cups, hero pour passes, live spin model, commands |
 
 Conventions
 - New topic → next number (`10-…md`) + a row in this table. No loose `.md` files elsewhere.

@@ -1,16 +1,6 @@
-import { useRef, type ComponentType, type SVGProps } from 'react'
-import { Cup, CUP_GEOMETRY } from '../components/art/Cup'
-import {
-  AvocadoHalf,
-  Banana,
-  Blueberries,
-  KiwiSlice,
-  LemonSlice,
-  Mango,
-  MintLeaf,
-  OrangeSlice,
-  Strawberry,
-} from '../components/art/fruits'
+import { useRef, type ComponentType } from 'react'
+import { HERO_CUP, HERO_LAYERS, HeroCup } from '../components/art/HeroCup'
+import { FRUIT } from '../components/art/photos'
 import { btn } from '../components/ui/button'
 import { MenuGlyph, PhoneGlyph } from '../components/ui/glyphs'
 import { sticker } from '../components/ui/sticker'
@@ -18,6 +8,7 @@ import { BRAND } from '../data/brand'
 import { useReducedMotion } from '../hooks/useMedia'
 import { gsap, SplitText, useGSAP } from '../lib/gsap'
 import { onReady, scrollToTarget } from '../lib/lenis'
+import type { Cup3D } from '../lib/cup3d'
 import { toArabicDigits } from '../lib/utils'
 
 /**
@@ -28,11 +19,11 @@ import { toArabicDigits } from '../lib/utils'
  * Full choreography spec: docs/05-animation-spec.md
  */
 
-const LAYERS = ['#e8434f', '#f9a825', '#b9d86a']
+const LAYERS = HERO_LAYERS
 
 type Fruit = {
   key: string
-  Art: ComponentType<SVGProps<SVGSVGElement>>
+  Art: ComponentType<{ className?: string; eager?: boolean }>
   /** tailwind position + size classes */
   cls: string
   /** which liquid layer this fruit pours (null = decoration that bursts outward at the end) */
@@ -40,17 +31,17 @@ type Fruit = {
 }
 
 const FRUITS: Fruit[] = [
-  { key: 'straw-a', Art: Strawberry, layer: 0, cls: 'left-[4%] top-[24%] md:left-[15%] md:top-[18%] w-[clamp(64px,10vw,150px)]' },
-  { key: 'straw-b', Art: Strawberry, layer: 0, cls: 'right-[5%] top-[66%] md:right-auto md:left-[20%] md:top-[42%] w-[clamp(56px,8vw,120px)] -rotate-12' },
-  { key: 'mango', Art: Mango, layer: 1, cls: 'right-[3%] top-[22%] md:right-[13%] md:top-[14%] w-[clamp(72px,11vw,170px)]' },
-  { key: 'orange', Art: OrangeSlice, layer: 1, cls: 'left-[3%] top-[62%] md:left-[12%] md:top-[60%] w-[clamp(64px,9vw,140px)]' },
+  { key: 'straw-a', Art: FRUIT.strawberry, layer: 0, cls: 'left-[4%] top-[24%] md:left-[15%] md:top-[18%] w-[clamp(64px,10vw,150px)]' },
+  { key: 'straw-b', Art: FRUIT.strawberry, layer: 0, cls: 'right-[5%] top-[66%] md:right-auto md:left-[20%] md:top-[42%] w-[clamp(56px,8vw,120px)] -rotate-12' },
+  { key: 'mango', Art: FRUIT.mango, layer: 1, cls: 'right-[3%] top-[22%] md:right-[13%] md:top-[14%] w-[clamp(72px,11vw,170px)]' },
+  { key: 'orange', Art: FRUIT.orange, layer: 1, cls: 'left-[3%] top-[62%] md:left-[12%] md:top-[60%] w-[clamp(64px,9vw,140px)]' },
   // kept clear of «يبقى مكة» so the slogan is never covered
-  { key: 'avocado', Art: AvocadoHalf, layer: 2, cls: 'left-[3%] top-[74%] md:left-[25%] md:top-[58%] w-[clamp(60px,8vw,128px)] rotate-12' },
-  { key: 'kiwi', Art: KiwiSlice, layer: 2, cls: 'right-[3%] top-[76%] md:right-[25%] md:top-[62%] w-[clamp(56px,7.5vw,118px)]' },
-  { key: 'lemon', Art: LemonSlice, layer: null, cls: 'left-[26%] top-[9%] md:left-[31%] md:top-[8%] w-[clamp(40px,5.5vw,86px)]' },
-  { key: 'banana', Art: Banana, layer: null, cls: 'right-[24%] top-[6%] md:right-[31%] md:top-[5%] w-[clamp(56px,8vw,130px)]' },
-  { key: 'berries', Art: Blueberries, layer: null, cls: 'left-[1%] top-[44%] md:left-[3%] md:top-[22%] w-[clamp(44px,6vw,96px)]' },
-  { key: 'mint', Art: MintLeaf, layer: null, cls: 'right-[1%] top-[45%] md:right-[6%] md:top-[74%] w-[clamp(44px,6vw,100px)]' },
+  { key: 'avocado', Art: FRUIT.avocado, layer: 2, cls: 'left-[3%] top-[74%] md:left-[25%] md:top-[58%] w-[clamp(60px,8vw,128px)] rotate-12' },
+  { key: 'kiwi', Art: FRUIT.kiwi, layer: 2, cls: 'right-[3%] top-[76%] md:right-[25%] md:top-[62%] w-[clamp(56px,7.5vw,118px)]' },
+  { key: 'lemon', Art: FRUIT.lemon, layer: null, cls: 'left-[26%] top-[9%] md:left-[31%] md:top-[8%] w-[clamp(40px,5.5vw,86px)]' },
+  { key: 'banana', Art: FRUIT.banana, layer: null, cls: 'right-[24%] top-[6%] md:right-[31%] md:top-[5%] w-[clamp(56px,8vw,130px)]' },
+  { key: 'berries', Art: FRUIT.berries, layer: null, cls: 'left-[1%] top-[44%] md:left-[3%] md:top-[22%] w-[clamp(44px,6vw,96px)]' },
+  { key: 'mint', Art: FRUIT.mint, layer: null, cls: 'right-[1%] top-[45%] md:right-[6%] md:top-[74%] w-[clamp(44px,6vw,100px)]' },
 ]
 
 const STEPS = [
@@ -70,7 +61,7 @@ export function JuiceHero() {
       const q = gsap.utils.selector(root)
       const stage = root.current!.querySelector<HTMLElement>('.hero-stage')!
       const cupEl = root.current!.querySelector<HTMLElement>('.hero-cup')!
-      const { rimY, bottomY, height: cupH } = CUP_GEOMETRY
+      const { rects, levels, bottom, surfaceScale, rim } = HERO_CUP
 
       /* ---------- intro (after preloader) ---------- */
       const lines = SplitText.create(q('.hero-line'), { type: 'words', mask: 'words', wordsClass: 'split-word' })
@@ -86,6 +77,57 @@ export function JuiceHero() {
         .to(q('.fruit-pop'), { scale: 1, rotation: 0, stagger: 0.05, ease: 'back.out(1.8)', duration: 1 }, 0.3)
         .to(q('.hero-fade'), { autoAlpha: 1, y: 0, stagger: 0.08, duration: 0.9 }, 0.6)
       const off = onReady(() => intro.play())
+
+      /* ---------- the live 3D cup (lazy) ----------
+         Once the garnish has landed, the sprites hand over to the WebGL cup (same frame at yaw 0), which spins
+         4 turns in 1.4 s — a real, timed spin, not scrubbed, so it is always fast — and at full speed becomes the
+         real cup (cup3d.ts eases the proportions first; a light motion blur covers the swap). Scroll back = it
+         spins back into ours and returns to the sprites. `?cup=makka` keeps our cup. */
+      const canvas = q('.hero-cup-3d')[0] as HTMLCanvasElement
+      const sprites = q('.hero-cup-sprites')[0]
+      let cup3d: Cup3D | null = null
+      let ro: ResizeObserver | null = null
+      let requested = false
+      let shown = false
+      const TURNS = 4
+      const PAD: [number, number] = [1.5, 1.2] // canvas box vs cup box (see the canvas classes below)
+      const spin = { v: 0 }
+      const applySpin = () => {
+        const on = !!cup3d && spin.v > 0.001
+        if (on !== shown) {
+          shown = on
+          gsap.set(canvas, { autoAlpha: on ? 1 : 0 })
+          gsap.set(sprites, { autoAlpha: on ? 0 : 1 })
+        }
+        if (!on) return
+        cup3d!.setSpin(spin.v)
+        const blur = 3.5 * Math.sin((Math.PI * spin.v) / TURNS) ** 2
+        canvas.style.filter = blur > 0.15 ? `blur(${blur.toFixed(2)}px)` : ''
+      }
+      const spinTl = gsap.timeline({ paused: true }).to(spin, { v: TURNS, duration: 1.4, ease: 'power3.inOut', onUpdate: applySpin })
+      let spunForward = false
+      const load3d = () => {
+        if (requested || (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData) return
+        requested = true
+        const finale = new URLSearchParams(location.search).get('cup') === 'makka' ? 'makka' : 'real'
+        import('../lib/cup3d')
+          .then(({ createCup3D }) => createCup3D(canvas, finale, PAD, TURNS))
+          .then((c) => {
+            cup3d = c
+            ro = new ResizeObserver(() => c.setSize(cupEl.clientWidth * PAD[0], cupEl.clientHeight * PAD[1]))
+            ro.observe(cupEl)
+            // arrived late (the visitor flew past the moment): replay the spin if the hero is still pinned
+            if (spunForward) {
+              if (tl.scrollTrigger?.isActive) spinTl.restart()
+              else applySpin()
+            }
+          })
+          .catch(() => {})
+      }
+      const tilt = { x: 0, y: 0 }
+      const tiltOpts = { duration: 0.9, ease: 'power3', onUpdate: () => cup3d?.setTilt(tilt.x, tilt.y) }
+      const tiltX = gsap.quickTo(tilt, 'x', tiltOpts)
+      const tiltY = gsap.quickTo(tilt, 'y', tiltOpts)
 
       /* ---------- idle float ---------- */
       const floats = q('.fruit-float').map((el, n) =>
@@ -113,6 +155,10 @@ export function JuiceHero() {
         pointer.x = e.clientX / window.innerWidth - 0.5
         pointer.y = e.clientY / window.innerHeight - 0.5
         applyParallax()
+        if (shown) {
+          tiltX(pointer.x * 0.7)
+          tiltY(pointer.y * 0.16)
+        }
       })
       window.addEventListener('pointermove', move)
 
@@ -121,7 +167,7 @@ export function JuiceHero() {
         const ch = cupEl.offsetHeight
         return {
           x: stage.clientWidth / 2,
-          y: (stage.clientHeight - ch) / 2 + (ch * (rimY + 40)) / cupH,
+          y: (stage.clientHeight - ch) / 2 + ch * (rim + 0.08),
         }
       }
       const delta = (el: HTMLElement) => {
@@ -133,12 +179,22 @@ export function JuiceHero() {
       }
 
       /* ---------- the scrubbed story ---------- */
-      const layers = q('.cup-layer') as unknown as SVGGElement[]
-      gsap.set(layers, { y: bottomY + 12 })
-      gsap.set(q('.cup-ice-cube'), { y: -420, autoAlpha: 0 })
-      gsap.set(q('.cup-straw'), { y: -760, autoAlpha: 0 })
+      // pour state: each column is revealed through a window that slides down while the picture slides up
+      // by the same amount (transform-only clip); the level is a % of the column's own height
+      const win = (k: number) => q(`.cup-win[data-k="${k}"]`)[0]
+      const col = (k: number) => win(k).querySelector('.cup-col')!
+      const surf = q('.cup-surf')
+      const clipPct = (k: number, level: number) => Math.max(0, ((level - rects[`col-${k}`][1]) / rects[`col-${k}`][3]) * 100)
+      LAYERS.forEach((_, k) => {
+        gsap.set(win(k), { yPercent: 100 })
+        gsap.set(col(k), { yPercent: -100 })
+      })
+      gsap.set(surf, { autoAlpha: 0 })
+      const cupPx = () => cupEl.offsetHeight
+      gsap.set(q('.cup-ice-cube'), { y: () => -cupPx(), autoAlpha: 0 })
+      gsap.set(q('.cup-straw'), { y: () => -cupPx() * 1.2, autoAlpha: 0 })
       gsap.set(q('.cup-cream'), { scale: 0, transformOrigin: '50% 95%' })
-      gsap.set(q('.cup-garnish > g'), { scale: 0, autoAlpha: 0, transformOrigin: '50% 50%' })
+      gsap.set(q('.cup-garnish > *'), { scale: 0, autoAlpha: 0, transformOrigin: '50% 50%' })
       gsap.set(q('.hero-step'), { autoAlpha: 0, y: 40 })
       gsap.set(q('.hero-final'), { autoAlpha: 0 })
       gsap.set(q('.hero-final-word'), { yPercent: 140, rotation: 4 })
@@ -157,6 +213,7 @@ export function JuiceHero() {
           anticipatePin: 1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
+            if (!requested && self.progress > 0.2) load3d()
             const pct = Math.round(self.progress * 100)
             if (pct !== lastPct) meterNum.textContent = `${toArabicDigits((lastPct = pct))}٪`
             setMeter(self.progress)
@@ -192,17 +249,29 @@ export function JuiceHero() {
             .to(el, { autoAlpha: 0, duration: 0.15 }, t + 1.1)
         })
         const hit = t0 + 1.2
-        const drops = q(`.cup-splash[data-i="${layer}"] circle`)
+        // droplets are in the old SVG units (cup = 300 wide) → px
+        const unit = () => cupEl.offsetWidth / 300
+        const drops = q(`.cup-splash[data-i="${layer}"] img`)
         drops.forEach((d) => {
           const dx = Number(d.getAttribute('data-dx'))
           const dy = Number(d.getAttribute('data-dy'))
-          tl.fromTo(d, { x: 0, y: 0, autoAlpha: 0 }, { x: dx, y: dy, autoAlpha: 1, duration: 0.35, ease: 'power2.out', immediateRender: false }, hit)
-            .to(d, { y: dy + 90, autoAlpha: 0, duration: 0.45, ease: 'power2.in' }, hit + 0.35)
+          tl.fromTo(d, { x: 0, y: 0, autoAlpha: 0 }, { x: () => dx * unit(), y: () => dy * unit(), autoAlpha: 1, duration: 0.35, ease: 'power2.out', immediateRender: false }, hit)
+            .to(d, { y: () => (dy + 90) * unit(), autoAlpha: 0, duration: 0.45, ease: 'power2.in' }, hit + 0.35)
         })
-        tl.to(layers[layers.length - 1 - layer], { y: () => Number(layers[layers.length - 1 - layer].dataset.top), duration: 1.2, ease: 'power2.out' }, hit - 0.05)
-          .to(q('.hero-step')[layer], { autoAlpha: 1, y: 0, duration: 0.5 }, t0 + 0.2)
+        // the new layer is poured on top of the last one: its level (and surface) rises from there
+        const from = layer ? levels[layer - 1] : bottom
+        const pour = { duration: 1.2, ease: 'power2.out' }
+        const startClip = layer ? clipPct(layer, from) : 100
+        const [, sy, , sh] = rects[`surf-${layer}`]
+        tl.set(win(layer), { yPercent: startClip }, hit - 0.06)
+          .set(col(layer), { yPercent: -startClip }, hit - 0.06)
+          .set(surf[layer], { autoAlpha: 1, yPercent: ((from - (sy + sh / 2)) / sh) * 100, scale: layer ? surfaceScale[layer] / surfaceScale[layer - 1] : surfaceScale[0] }, hit - 0.06)
+          .to(win(layer), { yPercent: 0, ...pour }, hit - 0.05)
+          .to(col(layer), { yPercent: 0, ...pour }, hit - 0.05)
+          .to(surf[layer], { yPercent: 0, scale: 1, ...pour }, hit - 0.05)
+        if (layer) tl.set(surf[layer - 1], { autoAlpha: 0 }, hit - 0.05)
+        tl.to(q('.hero-step')[layer], { autoAlpha: 1, y: 0, duration: 0.5 }, t0 + 0.2)
           .to(q('.hero-step')[layer], { autoAlpha: 0, y: -40, duration: 0.5 }, t0 + 2.2)
-        if (layer === 0) tl.to(q('.cup-bubbles'), { autoAlpha: 1, duration: 0.4 }, hit + 0.4)
       })
 
       const t4 = 1 + LAYERS.length * 2.4
@@ -212,7 +281,7 @@ export function JuiceHero() {
         .to(q('.cup-cream'), { scale: 1, duration: 0.6, ease: 'back.out(2.2)' }, t4 + 0.6)
         .to(q('.cup-straw'), { autoAlpha: 1, duration: 0.05 }, t4 + 0.8)
         .to(q('.cup-straw'), { y: 0, duration: 0.7, ease: 'power3.out' }, t4 + 0.8)
-        .to(q('.cup-garnish > g'), { scale: 1, autoAlpha: 1, stagger: 0.12, duration: 0.5, ease: 'back.out(2.5)' }, t4 + 1.1)
+        .to(q('.cup-garnish > *'), { scale: 1, autoAlpha: 1, stagger: 0.12, duration: 0.5, ease: 'back.out(2.5)' }, t4 + 1.1)
         .to(q('.hero-step')[3], { autoAlpha: 0, y: -40, duration: 0.4 }, t4 + 1.6)
 
       /* finale — flip to lime, decor fruits burst outward, headline lands */
@@ -234,10 +303,22 @@ export function JuiceHero() {
         .to(q('.hero-meter'), { autoAlpha: 0, duration: 0.3 }, t5 + 0.8)
         .to({}, { duration: 0.6 })
 
+      // the spin fires when the scrubbed story passes the finale (and plays back if you scroll up past it)
+      const SPIN_AT = t5 + 0.15
+      tl.eventCallback('onUpdate', () => {
+        const past = tl.time() >= SPIN_AT
+        if (past === spunForward) return
+        spunForward = past
+        if (past) spinTl.play()
+        else spinTl.reverse()
+      })
+
       return () => {
         off()
         window.removeEventListener('pointermove', move)
         lines.revert()
+        ro?.disconnect()
+        cup3d?.dispose()
       }
     },
     { scope: root, dependencies: [reduced] },
@@ -279,7 +360,7 @@ export function JuiceHero() {
               <div className="fruit-pop">
                 {/* own layer: the idle float never re-rasterises the drop-shadow */}
                 <div className="fruit-float will-change-transform">
-                  <Art className="h-auto w-full drop-shadow-[0_18px_24px_rgba(0,0,0,0.35)]" />
+                  <Art eager className="h-auto w-full drop-shadow-[0_18px_24px_rgba(0,0,0,0.35)]" />
                 </div>
               </div>
             </div>
@@ -292,13 +373,10 @@ export function JuiceHero() {
             {/* static shadow (a CSS drop-shadow on the cup would be recomputed every frame the liquid waves) */}
             <div aria-hidden className="absolute inset-x-[10%] bottom-[-4%] h-[8%] rounded-[50%] bg-black/35 blur-xl" />
             <div aria-hidden className="absolute inset-x-[18%] top-[34%] bottom-[-3%] rounded-[40%] bg-black/25 blur-2xl" />
-            <Cup
-              layers={LAYERS}
-              animated={!reduced}
-              print="light"
-              className="relative h-full w-full"
-              title="كوباية كوكتيل مكة: فراولة، مانجو، أفوكادو، تلج وكريمة"
-            />
+            <HeroCup className="hero-cup-sprites" />
+            {/* 1.5× wider / 1.2× taller than the cup box (PAD) so the straw and garnish never clip while spinning */}
+            <canvas aria-hidden className="hero-cup-3d invisible absolute -inset-x-[25%] -inset-y-[10%] h-[120%] w-[150%] opacity-0" />
+            <span className="sr-only">كوباية كوكتيل مكة: فراولة، مانجو، أفوكادو، تلج وكريمة</span>
           </div>
         </div>
 

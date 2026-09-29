@@ -5,6 +5,7 @@ Logo spins/pops in (back.out) · «بنعصرلك…» + ٠٪→١٠٠٪ counter
 logo pops and fades · panel lifts (yPercent −100, expo.inOut 1.1 s) · READY.
 
 ## Hero — "the juice builds itself" (pinned, +420 % of viewport, scrub 0.9)
+The cup is a 3D render split into stacked sprites (docs/10); the fruit are 3D sprites too.
 Intro on READY: headline words rise from masks (expo.out, stagger .09) · cup rises in · 10 fruits pop in
 (back.out, stagger .05) · side copy + scroll hint fade up. Idle: every fruit floats (sine yoyo). Mouse parallax on the
 fruit layer (±26/18 px).
@@ -13,10 +14,11 @@ fruit layer (±26/18 px).
 |---|---|
 | 0 → 1.2 | «لو عصير…» / «يبقى مكة» drift apart and dim to 12 % · intro chrome fades · fill meter appears |
 | 1.0 / 3.4 / 5.8 | per layer: its 2 fruits arc into the cup mouth (x ease power1.inOut, y up then down, spin, shrink, fade) |
-| hit + 0 | 8 splash droplets in the layer colour burst and fall · the layer rises with a live wave surface |
+| hit + 0 | 8 glossy juice droplets (3D sprites) burst and fall · the layer is poured **on top of the previous surface**: its column is revealed from that level up (window/counter-translate, transforms only) while its surface ellipse rises and widens with the cup's taper |
 | | layers: strawberry #e8434f → mango #f9a825 → avocado #b9d86a · step caption 01–03 swaps in/out |
 | 8.2 → 9.9 | step 04 · ice cubes drop (bounce.out) · cream pops · pink straw drops in · kiwi/strawberry/mint garnish pops |
 | 9.9 → end | background flips to Makka lime · decoration fruits burst outward · cup tilts −4°, scales 1.04 and settles 7 % lower · «مكة على طول» (10rem, 4svh) lands word by word · CTAs |
+| 10.05 | **the cup becomes real** — a *timed* spin (not scrubbed, so it's always fast), fired when the story passes this point: the sprites hand over to our WebGL cup at yaw 0 (same camera/lights → same frame), it spins **4 turns in 1.4 s** (power3.inOut); while speeding up it eases into the real cup's size/proportions, and at full speed (2 turns) it swaps to the user's Tripo model under a light motion blur (`blur()` ∝ speed), then lands facing you. Scroll back past it = the same spin in reverse into our cup and the sprites. Afterwards the mouse tilts it (±0.7 rad). three.js loads at 20 % of the hero; if it arrives late the spin replays while the hero is still pinned. `?cup=makka` keeps our cup |
 Fill meter (desktop, left) shows the scroll progress as ٪ in Arabic digits. Mouse parallax fades to 0 over the
 first 8 % of scroll so every fruit lands exactly in the cup mouth.
 
@@ -45,7 +47,7 @@ Reduced motion: the lit night, no pin.
 
 ## Signatures (pinned horizontal)
 Track moves right (RTL) by `scrollWidth − innerWidth`, scrub 0.8; lime progress bar; hover tilts the cup −6° and
-scales 1.05. Nothing inside a card animates while the track moves (cards are pre-rastered layers). Each card's
+scales 1.05. Cups are 3D renders (`cup-sig-N`) with each drink's layer colours. Nothing inside a card animates while the track moves (cards are pre-rastered layers). Each card's
 backdrop: sun rays behind the cup + the drink name printed 3× tone-on-tone (outlined / filled / outlined, −9°).
 
 ## Menu
@@ -77,7 +79,7 @@ pulses. Branch cards: swipe row with snap, arrows, progress thumb; the row nudge
    number; the liquid layer is hidden and paused. Scroll back up = reverses to the lime liquid.
 Hover: digits hop one after another. Section fruits drift past (Floaters).
 
-## Floaters (Story, Menu heading, Bottles, Branches, 17370)
+## Floaters (Story, Menu heading, Bottles, Branches, 17370) — 3D fruit sprites
 `ui/Floaters.tsx`: each fruit drifts ±60 %×depth of its own height and spins over its section's scroll (scrub).
 
 ## Header

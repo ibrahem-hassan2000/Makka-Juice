@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { ICONS } from '../components/art/icons'
+import { FRUIT } from '../components/art/photos'
 import { btn } from '../components/ui/button'
 import { Floaters } from '../components/ui/Floaters'
 import { JUICE } from '../components/ui/juice'
@@ -20,10 +20,10 @@ const JUICES = [
 
 // fruit that lands on the number once it has turned into juice (sized in em → scales with the digits)
 const LANDING = [
-  { Icon: ICONS.mint, cls: 'top-[4%] -left-[0.16em] w-[0.26em]', bob: '4.6s' },
-  { Icon: ICONS.strawberry, cls: '-top-[0.06em] left-[44%] w-[0.3em]', bob: '5.4s' },
-  { Icon: ICONS.kiwi, cls: '-bottom-[0.02em] left-[22%] w-[0.26em]', bob: '6s' },
-  { Icon: ICONS.orange, cls: 'bottom-[6%] -right-[0.18em] w-[0.3em]', bob: '5s' },
+  { Icon: FRUIT.mint, cls: 'top-[4%] -left-[0.16em] w-[0.26em]', bob: '4.6s' },
+  { Icon: FRUIT.strawberry, cls: '-top-[0.06em] left-[44%] w-[0.3em]', bob: '5.4s' },
+  { Icon: FRUIT.kiwi, cls: '-bottom-[0.02em] left-[22%] w-[0.26em]', bob: '6s' },
+  { Icon: FRUIT.orange, cls: 'bottom-[6%] -right-[0.18em] w-[0.3em]', bob: '5s' },
 ]
 
 /** The hotline as a glass you fill by scrolling — and once it's full, every digit turns into its own juice. */

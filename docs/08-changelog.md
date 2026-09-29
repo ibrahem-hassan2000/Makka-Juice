@@ -135,3 +135,36 @@ User loved the footer's sticker wordmark and the floating fruit of the CTA → s
 - 12 branch map links from the user.
 - Re-measure the first pass on the prod build (browser pane kept going hidden) + on a real mid-range Android phone.
 - Deploy preview + pitch (07, 09).
+
+## 2026-09-28/29 — Session 5 (everything fruit + cups goes 3D)
+- Gave the user an image prompt + a clean cup reference (`docs/assets/cup-reference.png`) for AI → image-to-3D;
+  then the user asked us to do it ourselves: «خلي معظم الفاكهة والكبايات تبقى realistic as 3D».
+- **Render studio** (`tools/render`, three.js, dev only): procedural models + textures for 13 fruit, the Makka
+  cup (clear PET with real transmission, dark-green print, layered juice, whipped-cream swirl, straw, ice, garnish,
+  condensation), softbox product lighting, black/white difference matte for exact alpha. → docs/10.
+- **Site**: all decoration fruit (Floaters, mobile menu, footer, 17370 landing fruit, nav wordmark, branch cards,
+  hero fruit) are now 3D sprites (`FRUIT` in `art/photos.tsx`, SVG fallback for unrendered ones; menu/marquee
+  icons stay flat). Signature cards show rendered cups. The hero cup is 17 stacked passes; the pour now starts each
+  layer from the previous surface and the surface widens with the taper — transforms only.
+- **Live 3D spin** at the end of the hero (lazy three.js + meshopt GLB, same camera/lights as the sprites, renders
+  on demand) — the user's original idea. Their **Tripo** model was tested (good front, opaque plastic + white print)
+  and is available as `?cup=tripo`.
+- Tooling: `tools/shoot.mjs` takes QA screenshots through headless Chrome (the browser pane stays hidden); used for
+  hero frames on 1440×900 and 390×844 and every section.
+- Build: initial JS unchanged; +~1 MB of WebP (hero ~300 KB eager, the rest lazy); `cup3d` chunk 162 KB gzip + GLB
+  ~530 KB only inside the hero.
+
+**Left to do**
+- User's verdict on the 3D look (fruit + cups + spin) and on Tripo vs our cup.
+- Bottles section is still flat SVG — could be rendered the same way.
+- Real-phone frame check of the hero (27 sprite layers + the WebGL spin) on a mid-range Android.
+- Still from before: 11 branch map links, 5 unpriced menu rows, signature recipes.
+
+## 2026-09-29 — Session 6 (the cup becomes real)
+- User: «بعد ما المكونات تتحط… يختفي الشكل الكرتوني والعصير يلف أوي بسرعة ويتغير للشكل الحقيقي من غير ما يبان التغير».
+- Hero finale is now a **timed** 4-turn spin (1.4 s) fired when the story passes the finale (reverses on scroll-up):
+  sprites → our WebGL cup at yaw 0 → eases into the Tripo cup's size/proportions → swaps at top speed under a
+  speed-linked blur → lands facing you. Both GLBs load lazily; canvas padded 1.5×/1.2× so nothing clips. The
+  scrubbed 360° spin and the +40 % pin length were removed (pin back to +420 %). `?cup=makka` keeps our cup.
+- `tools/shoot.mjs` got burst captures (`name@y*N`) to film timed animations; checked 1440×900 + 390×844, and
+  scrolling back up.

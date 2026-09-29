@@ -7,6 +7,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   build: {
     target: 'es2022',
+    // the only big chunk is three.js for the hero's live 3D cup (cup3d, ~160 kB gzip) — lazy, loaded inside the hero
+    chunkSizeWarningLimit: 700,
     rollupOptions: {
       output: {
         // keep the animation engine in its own long-cached chunk

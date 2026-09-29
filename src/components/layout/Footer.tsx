@@ -4,6 +4,7 @@ import { gsap, prefersReducedMotion, SplitText, useGSAP } from '../../lib/gsap'
 import { scrollToTarget } from '../../lib/lenis'
 import { toArabicDigits, wavePath } from '../../lib/utils'
 import { ICONS } from '../art/icons'
+import { FRUIT } from '../art/photos'
 import { MakkaLogo } from '../brand/MakkaLogo'
 import { btn } from '../ui/button'
 import { sticker } from '../ui/sticker'
@@ -26,11 +27,11 @@ const LINKS = [
 
 // fruits orbiting the wordmark — outer div pops in (GSAP), inner span bobs (CSS), so they never fight
 const FLOATERS = [
-  { Icon: ICONS.strawberry, cls: 'top-[2%] right-[4%] w-[clamp(44px,8vw,110px)]', bob: '5s', delay: '0s' },
-  { Icon: ICONS.kiwi, cls: 'bottom-[6%] right-[26%] w-[clamp(36px,6vw,84px)]', bob: '6.5s', delay: '-2s' },
-  { Icon: ICONS.mango, cls: 'top-[0%] left-[30%] w-[clamp(40px,7vw,100px)]', bob: '5.8s', delay: '-1s' },
-  { Icon: ICONS.orange, cls: 'bottom-[4%] left-[5%] w-[clamp(44px,7.5vw,104px)]', bob: '7s', delay: '-3s' },
-  { Icon: ICONS.mint, cls: 'top-[40%] left-[50%] w-[clamp(30px,4vw,60px)]', bob: '4.6s', delay: '-1.5s' },
+  { Icon: FRUIT.strawberry, cls: 'top-[2%] right-[4%] w-[clamp(44px,8vw,110px)]', bob: '5s', delay: '0s' },
+  { Icon: FRUIT.kiwi, cls: 'bottom-[6%] right-[26%] w-[clamp(36px,6vw,84px)]', bob: '6.5s', delay: '-2s' },
+  { Icon: FRUIT.mango, cls: 'top-[0%] left-[30%] w-[clamp(40px,7vw,100px)]', bob: '5.8s', delay: '-1s' },
+  { Icon: FRUIT.orange, cls: 'bottom-[4%] left-[5%] w-[clamp(44px,7.5vw,104px)]', bob: '7s', delay: '-3s' },
+  { Icon: FRUIT.mint, cls: 'top-[40%] left-[50%] w-[clamp(30px,4vw,60px)]', bob: '4.6s', delay: '-1.5s' },
 ]
 
 export function Footer() {

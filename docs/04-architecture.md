@@ -10,23 +10,28 @@
 | Smooth scroll | Lenis 1.3 driven by `gsap.ticker` | one RAF for Lenis + ScrollTrigger |
 | UI micro-motion | Motion 13 (`motion/react`, `LazyMotion` + lazily loaded `domMax`) | menu chip + list transitions |
 | Font | Fontsource self-hosted Baloo Bhaijaan 2 (variable) | no Google Fonts request, unicode-range subsets |
+| 3D | three.js 0.186 — offline render studio (`tools/render`) + one lazy live model in the hero | realistic fruit/cups as sprites, no WebGL cost elsewhere |
 
 ## Folders
 ```
 docs/                 ← all project knowledge
+tools/render/         dev-only 3D render studio (three.js) → src/assets/render/*.webp + models/*.glb  (see 10)
+tools/shoot.mjs       QA screenshots through headless Chrome
 src/
+  assets/render/      3D sprites: fruit, cup-sig-*, hero-* passes + hero-cup.json · assets/models/ GLBs
   data/               brand.ts · menu.ts · signatures.ts · menuIcons.ts (item name → fruit icons)  ← content only
-  lib/                gsap.ts (plugins) · lenis.ts (smooth scroll + READY event) · utils.ts · motionFeatures.ts
+  lib/                gsap.ts (plugins) · lenis.ts (smooth scroll + READY event) · utils.ts · motionFeatures.ts ·
+                      cup3d.ts (lazy live 3D hero cup)
   hooks/useMedia.ts   matchMedia hooks (reduced motion, fine pointer)
   components/
-    art/              fruits.tsx (hero-size) · icons.tsx (45 light icons) · Cup · Bottle (body/fizz/cap layers) · mapArt ·
-                      corniche.tsx (Qaitbay, lamp post, tram, stars)
+    art/              photos.tsx (FRUIT: 3D sprite or icon fallback, render()) · HeroCup (stacked hero passes) ·
+                      icons.tsx (45 light icons) · Bottle (body/fizz/cap layers) · mapArt · Cup/fruits (old SVG, unused)
     brand/            MakkaLogo (roundel recreation — swap for official) · Wordmark (sticker «عصير مكة» + fruit)
     layout/           Header · Footer · Preloader · Cursor
     ui/               SectionHeading (accent= sticker phrase) · PricePills · button.ts (sticker buttons) ·
                       sticker.ts (sticker type presets) · glyphs · Floaters (scroll-drifting fruit) ·
                       juice.ts + JuicyText (juice-filled text with a fruit print)
-  sections/           JuiceHero · FruitMarquee · Story · Corniche · Signatures · MenuExplorer · Bottles · Branches · HotlineCTA
+  sections/           JuiceHero · FruitMarquee · Story · Signatures · MenuExplorer · Bottles · Branches · HotlineCTA
 ```
 
 ## Runtime flow
@@ -37,7 +42,9 @@ src/
 
 ## Performance
 - Initial JS ≈ 165 KB gzip (react 66 · gsap+lenis 57 · app ~43). Motion's layout engine is a lazy chunk (28 KB).
-- All artwork is inline SVG — zero image requests. Font subsets by unicode-range.
+- Fruit + cups are pre-rendered 3D WebP sprites (~1 MB total; hero passes + hero fruit eager, the rest lazy);
+  everything else is inline SVG. Font subsets by unicode-range.
+- three.js (~160 KB gzip) + the cup GLB (~530 KB) load only inside the hero, for the final spin, and render on demand.
 - Animations touch transform / opacity (+ CSS vars for the liquid text). Idle loops pause off-screen.
 - `prefers-reduced-motion`: no pins/scrub, final states shown.
 

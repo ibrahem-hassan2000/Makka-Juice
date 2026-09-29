@@ -1,5 +1,5 @@
 import { cn } from '../../lib/utils'
-import { ICONS } from '../art/icons'
+import { FRUIT } from '../art/photos'
 import { sticker } from '../ui/sticker'
 
 /**
@@ -16,7 +16,7 @@ export function Wordmark({ className, tone = 'light' }: { className?: string; to
         className="absolute -top-[0.5em] -right-[0.32em] w-[0.72em] rotate-[18deg] transition-[rotate,translate] duration-500 ease-(--ease-squish) group-hover/wm:-translate-y-[0.18em] group-hover/wm:rotate-[-8deg]"
       >
         <span className="block animate-[bob_4.6s_ease-in-out_infinite]">
-          <ICONS.strawberry className="h-auto w-full" />
+          <FRUIT.strawberry eager className="h-auto w-full drop-shadow-[0_0.04em_0.05em_rgba(0,0,0,0.3)]" />
         </span>
       </span>
       <span
@@ -24,7 +24,7 @@ export function Wordmark({ className, tone = 'light' }: { className?: string; to
         className="absolute -bottom-[0.28em] -left-[0.3em] w-[0.56em] rotate-[-20deg] transition-[rotate,translate] delay-75 duration-500 ease-(--ease-squish) group-hover/wm:-translate-y-[0.22em] group-hover/wm:rotate-[14deg]"
       >
         <span className="block animate-[bob_5.4s_ease-in-out_infinite] [animation-delay:-2s]">
-          <ICONS.orange className="h-auto w-full" />
+          <FRUIT.orange eager className="h-auto w-full drop-shadow-[0_0.04em_0.05em_rgba(0,0,0,0.3)]" />
         </span>
       </span>
     </span>

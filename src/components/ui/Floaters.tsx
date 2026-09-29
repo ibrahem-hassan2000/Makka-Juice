@@ -1,7 +1,8 @@
 import { useRef } from 'react'
 import { gsap, prefersReducedMotion, useGSAP } from '../../lib/gsap'
 import { cn } from '../../lib/utils'
-import { ICONS, type IconKey } from '../art/icons'
+import type { IconKey } from '../art/icons'
+import { FRUIT } from '../art/photos'
 
 export interface Floater {
   icon: IconKey
@@ -44,7 +45,7 @@ export function Floaters({ items, className, clip = true }: { items: Floater[]; 
   return (
     <div ref={ref} aria-hidden className={cn('pointer-events-none absolute inset-0', clip && 'overflow-hidden', className)}>
       {items.map(({ icon, cls, depth = 1 }, n) => {
-        const Icon = ICONS[icon]
+        const Icon = FRUIT[icon]
         return (
           <div key={n} data-depth={depth} className={cn('floater absolute will-change-transform', cls)}>
             <Icon className="h-auto w-full drop-shadow-[0_10px_12px_rgba(0,0,0,0.22)]" />

@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { Cup } from '../components/art/Cup'
+import { render } from '../components/art/photos'
 import { btn } from '../components/ui/button'
 import { MenuGlyph } from '../components/ui/glyphs'
 import { PriceTags } from '../components/ui/PricePills'
@@ -96,11 +96,15 @@ export function Signatures() {
               <div className="relative -my-2 flex flex-1 items-center justify-center">
                 <div aria-hidden className="absolute size-[80%] rounded-full bg-[radial-gradient(closest-side,rgba(255,255,255,0.4),transparent)]" />
                 <div className="sig-cup relative h-full max-h-[320px]">
-                  <Cup
-                    layers={s.layers}
-                    bubbles={false}
-                    className="h-full w-auto transition-transform duration-700 ease-(--ease-squish) group-hover:scale-105 group-hover:-rotate-6"
-                    title={`كوباية ${s.name}`}
+                  <img
+                    src={render(`cup-sig-${n}`)}
+                    alt={`كوباية ${s.name}`}
+                    width={460}
+                    height={644}
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                    className="h-full w-auto transition-transform duration-700 ease-(--ease-squish) select-none group-hover:scale-105 group-hover:-rotate-6"
                   />
                 </div>
               </div>

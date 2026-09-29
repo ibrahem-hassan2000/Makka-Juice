@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState, type ComponentType, type SVGProps } from 'react'
 import { ICONS, type IconKey } from '../components/art/icons'
+import { FRUIT } from '../components/art/photos'
 import { Boat, Lighthouse, Mosque, Palm, Pyramids, Scooter, Umbrella } from '../components/art/mapArt'
 import { btn } from '../components/ui/button'
 import { Floaters } from '../components/ui/Floaters'
@@ -35,7 +36,7 @@ const LANDMARKS: Record<string, { Art: ComponentType<SVGProps<SVGSVGElement>>; x
   cairo: { Art: Pyramids, x: 582, y: 436, w: 68 },
 }
 
-const CARD_ICONS: IconKey[] = ['strawberry', 'mango', 'orange', 'kiwi', 'watermelon', 'lemon', 'pomegranate', 'avocado', 'banana', 'grapes', 'guava', 'peach']
+const CARD_ICONS: IconKey[] = ['strawberry', 'mango', 'orange', 'kiwi', 'watermelon', 'lemon', 'pomegranate', 'avocado', 'banana', 'grapes', 'berries', 'peach']
 const twoDigits = (n: number) => toArabicDigits(String(n).padStart(2, '0'))
 
 /** Stylised Nile-delta map (a Makka scooter rides the route and lights every city) + branch finder. */
@@ -504,7 +505,7 @@ function BranchCarousel({ city }: { city: City }) {
 }
 
 function BranchCard({ branch: b, city, n }: { branch: Branch; city: City; n: number }) {
-  const Icon = ICONS[CARD_ICONS[n % CARD_ICONS.length]]
+  const Icon = FRUIT[CARD_ICONS[n % CARD_ICONS.length]]
   return (
     <article className="flex h-full flex-col rounded-[1.75rem] border-[3px] border-cream bg-cream p-5 text-forest-900 shadow-[0_6px_0_var(--color-leaf-600)]">
       <div className="flex items-start justify-between">

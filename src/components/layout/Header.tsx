@@ -3,7 +3,7 @@ import { BRAND } from '../../data/brand'
 import { gsap, ScrollTrigger, useGSAP } from '../../lib/gsap'
 import { lockScroll, scrollToTarget } from '../../lib/lenis'
 import { cn, toArabicDigits } from '../../lib/utils'
-import { ICONS } from '../art/icons'
+import { FRUIT } from '../art/photos'
 import { MakkaLogo } from '../brand/MakkaLogo'
 import { Wordmark } from '../brand/Wordmark'
 import { btn } from '../ui/button'
@@ -19,10 +19,10 @@ const LINKS = [
 
 // the open mobile menu gets the footer's bobbing fruit in its empty corners
 const PANEL_FRUITS = [
-  { Icon: ICONS.mango, cls: 'top-[13%] left-[8%] w-20', bob: '5.2s' },
-  { Icon: ICONS.kiwi, cls: 'bottom-[17%] left-[5%] w-20', bob: '4.8s' },
-  { Icon: ICONS.strawberry, cls: 'bottom-[4%] left-[32%] w-16', bob: '6.1s' },
-  { Icon: ICONS.mint, cls: 'bottom-[7%] right-[12%] w-10', bob: '5.6s' },
+  { Icon: FRUIT.mango, cls: 'top-[13%] left-[8%] w-20', bob: '5.2s' },
+  { Icon: FRUIT.kiwi, cls: 'bottom-[17%] left-[5%] w-20', bob: '4.8s' },
+  { Icon: FRUIT.strawberry, cls: 'bottom-[4%] left-[32%] w-16', bob: '6.1s' },
+  { Icon: FRUIT.mint, cls: 'bottom-[7%] right-[12%] w-10', bob: '5.6s' },
 ]
 
 export function Header() {
