@@ -41,16 +41,18 @@ export function Story() {
         return
       }
 
-      // word-by-word "fill" as you read
+      // word-by-word "fill", played once when the paragraph comes up (it used to be scrubbed: every scroll frame
+      // repainted the whole paragraph and made Chrome re-layerize the page)
       const split = SplitText.create('.story-text', { type: 'words' })
       gsap.fromTo(
         split.words,
         { opacity: 0.14 },
         {
           opacity: 1,
-          stagger: 0.1,
-          ease: 'none',
-          scrollTrigger: { trigger: '.story-text', start: 'top 75%', end: 'bottom 45%', scrub: true },
+          stagger: 0.028,
+          duration: 0.45,
+          ease: 'power1.out',
+          scrollTrigger: { trigger: '.story-text', start: 'top 72%', once: true },
         },
       )
 

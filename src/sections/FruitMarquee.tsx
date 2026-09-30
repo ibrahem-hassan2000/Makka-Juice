@@ -16,7 +16,7 @@ const WORDS = [
   ['موز', ART.banana],
 ] as const
 
-/** Two crossing bands that speed up (and flip) with scroll velocity. */
+/** Two crossing bands driven by the scroll: they slide while you scroll and glide to a stop when you stop. */
 export function FruitMarquee() {
   const root = useRef<HTMLElement>(null)
 
@@ -24,25 +24,35 @@ export function FruitMarquee() {
     () => {
       if (prefersReducedMotion()) return
       const tracks = gsap.utils.toArray<HTMLElement>('.marquee-track', root.current)
-      // created paused — they only run while the bands are on screen
+      // created paused; the scroll speed is their only engine (nothing moves on its own)
       const loops = tracks.map((t, n) =>
         n
           ? gsap.fromTo(t, { xPercent: -50 }, { xPercent: 0, duration: 38, ease: 'none', repeat: -1, paused: true })
           : gsap.to(t, { xPercent: -50, duration: 30, ease: 'none', repeat: -1, paused: true }),
       )
-      let boost = 0
+      let speed = 0
+      let running = false
       const tick = () => {
-        boost *= 0.92
-        loops.forEach((l) => l.timeScale(1 + boost))
+        speed *= 0.9
+        if (speed < 0.03) {
+          if (running) loops.forEach((l) => l.pause())
+          running = false
+          gsap.ticker.remove(tick)
+          return
+        }
+        loops.forEach((l) => l.timeScale(speed))
       }
-      gsap.ticker.add(tick)
       ScrollTrigger.create({
         trigger: root.current,
         start: 'top bottom',
         end: 'bottom top',
-        onToggle: (self) => loops.forEach((l) => (self.isActive ? l.play() : l.pause())),
         onUpdate: (self) => {
-          boost = Math.min(6, Math.abs(self.getVelocity()) / 350)
+          speed = Math.min(6, Math.abs(self.getVelocity()) / 250)
+          if (!running && speed >= 0.03) {
+            running = true
+            loops.forEach((l) => l.play())
+            gsap.ticker.add(tick)
+          }
         },
       })
       return () => gsap.ticker.remove(tick)

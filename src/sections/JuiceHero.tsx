@@ -91,6 +91,10 @@ export function JuiceHero() {
       let shown = false
       const TURNS = 4
       const PAD: [number, number] = [1.5, 1.2] // canvas box vs cup box (see the canvas classes below)
+      // phones/tablets get the light 3D path; very weak devices (or Save-Data) keep the sprites
+      const nav = navigator as Navigator & { connection?: { saveData?: boolean }; deviceMemory?: number }
+      const weak = !!nav.connection?.saveData || (nav.deviceMemory ?? 8) < 4 || (nav.hardwareConcurrency ?? 8) < 4
+      const lite = window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 768
       const spin = { v: 0 }
       const applySpin = () => {
         const on = !!cup3d && spin.v > 0.001
@@ -107,11 +111,11 @@ export function JuiceHero() {
       const spinTl = gsap.timeline({ paused: true }).to(spin, { v: TURNS, duration: 1.4, ease: 'power3.inOut', onUpdate: applySpin })
       let spunForward = false
       const load3d = () => {
-        if (requested || (navigator as Navigator & { connection?: { saveData?: boolean } }).connection?.saveData) return
+        if (requested || weak) return
         requested = true
         const finale = new URLSearchParams(location.search).get('cup') === 'makka' ? 'makka' : 'real'
         import('../lib/cup3d')
-          .then(({ createCup3D }) => createCup3D(canvas, finale, PAD, TURNS))
+          .then(({ createCup3D }) => createCup3D(canvas, finale, PAD, TURNS, lite))
           .then((c) => {
             cup3d = c
             ro = new ResizeObserver(() => c.setSize(cupEl.clientWidth * PAD[0], cupEl.clientHeight * PAD[1]))
@@ -124,6 +128,13 @@ export function JuiceHero() {
           })
           .catch(() => {})
       }
+      // the 3D cup is fetched + compiled + drawn once (hidden) as soon as the page is idle after the intro, so
+      // its one-time cost lands while the visitor is reading the hero — not in the middle of a scroll
+      let idleId = 0
+      const offIdle = onReady(() => {
+        const ric = window.requestIdleCallback ?? ((cb: () => void) => window.setTimeout(cb, 1800))
+        idleId = ric(() => load3d(), { timeout: 3500 })
+      })
       const tilt = { x: 0, y: 0 }
       const tiltOpts = { duration: 0.9, ease: 'power3', onUpdate: () => cup3d?.setTilt(tilt.x, tilt.y) }
       const tiltX = gsap.quickTo(tilt, 'x', tiltOpts)
@@ -207,9 +218,10 @@ export function JuiceHero() {
         scrollTrigger: {
           trigger: root.current,
           start: 'top top',
-          end: () => `+=${window.innerHeight * 4.2}`,
+          // shorter + snappier on phones: the whole pour in ~3 swipes, and the scene keeps up with the thumb
+          end: () => `+=${window.innerHeight * (window.innerWidth < 768 ? 3.3 : 4.2)}`,
           pin: stage,
-          scrub: 0.9,
+          scrub: window.innerWidth < 768 ? 0.5 : 0.9,
           anticipatePin: 1,
           invalidateOnRefresh: true,
           onUpdate: (self) => {
@@ -319,6 +331,8 @@ export function JuiceHero() {
         lines.revert()
         ro?.disconnect()
         cup3d?.dispose()
+        offIdle()
+        window.cancelIdleCallback?.(idleId)
       }
     },
     { scope: root, dependencies: [reduced] },

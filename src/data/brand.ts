@@ -3,13 +3,14 @@
 export const BRAND = {
   nameAr: 'عصير مكة',
   nameEn: 'Makka Juice',
+  /** one number for every branch — the branches' own numbers are no longer used (user, 2026-09-30) */
   hotline: '17370',
   slogans: {
     cup: 'لو عصير… يبقى مكة',
     campaign: 'مكة على طول',
     origin: 'من قلب اسكندرية',
   },
-  /** WhatsApp ordering — from Makka's own Facebook auto-reply (2026-09-28) */
+  /** WhatsApp ordering — from Makka's own Facebook auto-reply (2026-09-28); still in use (user, 2026-09-30) */
   whatsapp: {
     number: '01117118333',
     link: `https://wa.me/201117118333?text=${encodeURIComponent('أهلاً عصير مكة، عايز أطلب:')}`,
@@ -31,7 +32,6 @@ export const BRAND = {
 export interface Branch {
   name: string
   address: string
-  phone?: string
   /** Google Maps listing id (CID) — only when matched with evidence (docs/01 → "Google Maps"). */
   cid?: string
 }
@@ -57,13 +57,13 @@ export const CITIES: City[] = [
     name: 'الإسكندرية',
     map: { x: 345, y: 92 },
     branches: [
-      { name: 'سموحة ١', address: '١ شارع الطيار محمود شكري', phone: '01158119881', ...g('390279087656240776') },
+      { name: 'سموحة ١', address: '١ شارع الطيار محمود شكري', ...g('390279087656240776') },
       { name: 'سموحة ٢', address: 'شارع أدمون فرمون — أمام مدارس مصطفى النجار' },
-      { name: 'سبورتنج ١', address: 'شارع الدلتا — أمام ترام سبورتنج', phone: '034272600', ...g('1845285616063350403') },
+      { name: 'سبورتنج ١', address: 'شارع الدلتا — أمام ترام سبورتنج', ...g('1845285616063350403') },
       { name: 'سبورتنج ٢', address: 'طريق الجيش — بجوار مطعم عم سمير', ...g('6704572313063307024') },
       { name: 'الشاطبي', address: 'أمام مسرح بيرم التونسي', ...g('15216970012538686196') },
       { name: 'ميامي', address: '٧ شارع اسكندر إبراهيم', ...g('801613249222385193') },
-      { name: 'العصافرة ١', address: 'على البحر — بعد فندق الوردة البيضاء، أسفل فندق جولدن جويل', phone: '01277010036', ...g('3899208000934600576') },
+      { name: 'العصافرة ١', address: 'على البحر — بعد فندق الوردة البيضاء، أسفل فندق جولدن جويل', ...g('3899208000934600576') },
       { name: 'العصافرة ٢', address: 'شارع جمال عبد الناصر — أمام أسواق الشريف', ...g('992583237965841726') },
       { name: 'شارع ٤٥', address: 'شارع ٤٥ على البحر' },
       { name: 'المعمورة الشاطئ', address: 'شارع النصر — عمارة بورتو المعمورة' },

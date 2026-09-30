@@ -5,7 +5,9 @@
 - Described by listing sites as "أشهر محل عصائر في الإسكندرية" with a big range of cocktails & juices (aklaa.com).
 - Facebook category: "طاولة العصير والسموزي". Page address: **Smouha, Alexandria**. Listed as "open always".
 - **Hotline 17370** — one number for all branches (on every post, menu back cover, cover photo).
-- Facebook page phone: 012 77010036.
+- **2026-09-30 (user): the branches' own numbers are no longer used** — every branch card shows/calls 17370. The
+  WhatsApp ordering number (01117118333) stays. Old numbers below are history only: Facebook page phone
+  012 77010036, Smouha 1 01158119881, Sporting 1 034272600.
 
 ## Audience & reach
 | Channel | Handle | Numbers (2026-09-27) |

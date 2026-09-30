@@ -177,6 +177,7 @@ export function Header() {
       {/* mobile menu */}
       <div
         className="mobile-panel pointer-events-auto fixed inset-0 -z-10 flex flex-col justify-center overflow-hidden bg-lime px-8 lg:hidden"
+        data-open={open || undefined}
         style={{ clipPath: 'circle(0% at 10% 5%)' }}
         aria-hidden={!open}
         inert={!open}

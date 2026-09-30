@@ -20,10 +20,10 @@ const JUICES = [
 
 // fruit that lands on the number once it has turned into juice (sized in em → scales with the digits)
 const LANDING = [
-  { Icon: FRUIT.mint, cls: 'top-[4%] -left-[0.16em] w-[0.26em]', bob: '4.6s' },
-  { Icon: FRUIT.strawberry, cls: '-top-[0.06em] left-[44%] w-[0.3em]', bob: '5.4s' },
-  { Icon: FRUIT.kiwi, cls: '-bottom-[0.02em] left-[22%] w-[0.26em]', bob: '6s' },
-  { Icon: FRUIT.orange, cls: 'bottom-[6%] -right-[0.18em] w-[0.3em]', bob: '5s' },
+  { Icon: FRUIT.mint, cls: 'top-[4%] -left-[0.16em] w-[0.26em]' },
+  { Icon: FRUIT.strawberry, cls: '-top-[0.06em] left-[44%] w-[0.3em]' },
+  { Icon: FRUIT.kiwi, cls: '-bottom-[0.02em] left-[22%] w-[0.26em]' },
+  { Icon: FRUIT.orange, cls: 'bottom-[6%] -right-[0.18em] w-[0.3em]' },
 ]
 
 /** The hotline as a glass you fill by scrolling — and once it's full, every digit turns into its own juice. */
@@ -39,17 +39,15 @@ export function HotlineCTA() {
         gsap.set('.hotline-liquid', { autoAlpha: 0 })
         return
       }
-      // 1) scrubbed: the glass fills with lime juice — full exactly when the number reaches mid-screen
+      // 1) scrubbed: the glass fills with lime juice — full exactly when the number reaches mid-screen.
+      //    Transform-only: the juice window slides down while the lime digits inside slide up by the same %,
+      //    so the level rises without repainting the (huge) text. It used to be a background-clip:text fill
+      //    moved per frame — the most expensive paint on the page.
       const number = root.current!.querySelector('.hotline-number')
-      gsap.fromTo(
-        '.hotline-liquid',
-        { '--fill': '6%' },
-        {
-          '--fill': '90%',
-          ease: 'none',
-          scrollTrigger: { trigger: number, start: 'top 95%', end: 'center 55%', scrub: 0.6 },
-        },
-      )
+      gsap
+        .timeline({ defaults: { ease: 'none' }, scrollTrigger: { trigger: number, start: 'top 95%', end: 'center 55%', scrub: 0.6 } })
+        .fromTo('.liquid-win', { yPercent: 94 }, { yPercent: 10 }, 0)
+        .fromTo('.liquid-fill', { yPercent: -94 }, { yPercent: -10 }, 0)
       // 2) full → each digit pops into its own fruit juice, fruit lands on top. Scroll back up = back to lime.
       const juicy = gsap
         .timeline({ paused: true })
@@ -59,14 +57,15 @@ export function HotlineCTA() {
           { autoAlpha: 1, scale: 1, yPercent: 0, rotation: (i: number) => JUICES[i].tilt, stagger: 0.08, duration: 0.75, ease: 'back.out(2.4)' },
         )
         .fromTo('.hotline-fruit', { autoAlpha: 0, scale: 0, rotation: -120 }, { autoAlpha: 1, scale: 1, rotation: 0, stagger: 0.08, duration: 0.8, ease: 'back.out(2)' }, 0.35)
-        // hidden under the juice from here on: stop painting the sloshing liquid (it repainted every frame)
-        .set('.hotline-liquid', { autoAlpha: 0, animationPlayState: 'paused' })
+        // hidden under the juicy digits from here on
+        .set('.hotline-liquid', { autoAlpha: 0 })
       ScrollTrigger.create({
         trigger: number,
         start: 'center 55%',
         onEnter: () => juicy.play(),
         onLeaveBack: () => juicy.reverse(),
       })
+
     },
     { scope: root },
   )
@@ -94,9 +93,12 @@ export function HotlineCTA() {
           dir="ltr"
           aria-label={`اتصل بالخط الساخن ${BRAND.hotline}`}
         >
-          {/* py keeps the glyph bottoms inside the box — background-clip:text only fills inside it */}
-          <span aria-hidden className="hotline-liquid liquid-text block py-[0.06em]">
-            {BRAND.hotline}
+          {/* the glass: lime outline + the juice (same glyphs, filled) seen through a window with a wavy top */}
+          <span aria-hidden className="hotline-liquid relative block py-[0.06em]">
+            <span className="block text-transparent [-webkit-text-stroke:2px_var(--color-lime)]">{BRAND.hotline}</span>
+            <span className="liquid-win absolute inset-0 will-change-transform [clip-path:polygon(0%_3.2%,2.5%_4.38%,5%_5.3%,7.5%_5.77%,10%_5.67%,12.5%_5.04%,15%_4%,17.5%_2.79%,20%_1.67%,22.5%_0.88%,25%_0.6%,27.5%_0.88%,30%_1.67%,32.5%_2.79%,35%_4%,37.5%_5.04%,40%_5.67%,42.5%_5.77%,45%_5.3%,47.5%_4.38%,50%_3.2%,52.5%_2.02%,55%_1.1%,57.5%_0.63%,60%_0.73%,62.5%_1.36%,65%_2.4%,67.5%_3.61%,70%_4.73%,72.5%_5.52%,75%_5.8%,77.5%_5.52%,80%_4.73%,82.5%_3.61%,85%_2.4%,87.5%_1.36%,90%_0.73%,92.5%_0.63%,95%_1.1%,97.5%_2.02%,100%_3.2%,100%_100%,0%_100%)]">
+              <span className="liquid-fill block py-[0.06em] text-lime will-change-transform">{BRAND.hotline}</span>
+            </span>
           </span>
           {/* the juice layer: same glyphs, one box per digit, laid exactly over the liquid ones */}
           <span aria-hidden className="absolute inset-0 flex py-[0.06em]">
@@ -111,9 +113,9 @@ export function HotlineCTA() {
               </span>
             ))}
           </span>
-          {LANDING.map(({ Icon, cls, bob }, n) => (
+          {LANDING.map(({ Icon, cls }, n) => (
             <span key={n} aria-hidden className={`hotline-fruit invisible absolute ${cls}`}>
-              <span className="block animate-[bob_var(--bob)_ease-in-out_infinite]" style={{ ['--bob' as string]: bob }}>
+              <span className="block">
                 <Icon className="h-auto w-full drop-shadow-[0_0.03em_0.04em_rgba(0,0,0,0.35)]" />
               </span>
             </span>

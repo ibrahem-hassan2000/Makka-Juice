@@ -25,13 +25,13 @@ const LINKS = [
   { href: '#branches', label: 'الفروع', Icon: ICONS.strawberry },
 ]
 
-// fruits orbiting the wordmark — outer div pops in (GSAP), inner span bobs (CSS), so they never fight
+// fruit around the wordmark — outer div pops in, inner span drifts with the scroll (no loops)
 const FLOATERS = [
-  { Icon: FRUIT.strawberry, cls: 'top-[2%] right-[4%] w-[clamp(44px,8vw,110px)]', bob: '5s', delay: '0s' },
-  { Icon: FRUIT.kiwi, cls: 'bottom-[6%] right-[26%] w-[clamp(36px,6vw,84px)]', bob: '6.5s', delay: '-2s' },
-  { Icon: FRUIT.mango, cls: 'top-[0%] left-[30%] w-[clamp(40px,7vw,100px)]', bob: '5.8s', delay: '-1s' },
-  { Icon: FRUIT.orange, cls: 'bottom-[4%] left-[5%] w-[clamp(44px,7.5vw,104px)]', bob: '7s', delay: '-3s' },
-  { Icon: FRUIT.mint, cls: 'top-[40%] left-[50%] w-[clamp(30px,4vw,60px)]', bob: '4.6s', delay: '-1.5s' },
+  { Icon: FRUIT.strawberry, cls: 'top-[2%] right-[4%] w-[clamp(44px,8vw,110px)]' },
+  { Icon: FRUIT.kiwi, cls: 'bottom-[6%] right-[26%] w-[clamp(36px,6vw,84px)]' },
+  { Icon: FRUIT.mango, cls: 'top-[0%] left-[30%] w-[clamp(40px,7vw,100px)]' },
+  { Icon: FRUIT.orange, cls: 'bottom-[4%] left-[5%] w-[clamp(44px,7.5vw,104px)]' },
+  { Icon: FRUIT.mint, cls: 'top-[40%] left-[50%] w-[clamp(30px,4vw,60px)]' },
 ]
 
 export function Footer() {
@@ -44,6 +44,12 @@ export function Footer() {
       const mark = { trigger: '.footer-mark', start: 'top 92%', once: true }
       gsap.from(split.words, { yPercent: 140, rotation: 4, stagger: 0.14, duration: 1.3, ease: 'expo.out', scrollTrigger: mark })
       gsap.from('.footer-fruit', { scale: 0, rotation: -70, stagger: 0.09, duration: 1, ease: 'back.out(2)', delay: 0.25, scrollTrigger: mark })
+      // no loops: the wave slides and the fruit drift only while the footer scrolls in
+      const scrub = { trigger: root.current, start: 'top bottom', end: 'bottom bottom', scrub: 0.6 }
+      gsap.fromTo('.footer-wave', { xPercent: 0 }, { xPercent: -25, ease: 'none', scrollTrigger: scrub })
+      gsap.utils.toArray<HTMLElement>('.footer-bob').forEach((el, n) =>
+        gsap.fromTo(el, { yPercent: n % 2 ? -18 : 18, rotation: n % 2 ? 10 : -10 }, { yPercent: n % 2 ? 14 : -14, rotation: n % 2 ? -8 : 8, ease: 'none', scrollTrigger: scrub }),
+      )
       gsap.from('.footer-col', {
         y: 36,
         autoAlpha: 0,
@@ -64,7 +70,7 @@ export function Footer() {
     <footer ref={root} className="relative overflow-x-clip bg-forest-950 text-cream">
       {/* liquid edge poured over the section above — clipped wrapper: the 200%-wide wave must never widen the page */}
       <div aria-hidden className="pointer-events-none absolute inset-x-0 -top-[46px] h-[48px] overflow-hidden md:-top-[62px] md:h-16">
-        <svg viewBox="0 0 2400 70" preserveAspectRatio="none" className="absolute inset-y-0 left-0 h-full w-[200%] animate-[slide-half_14s_linear_infinite]">
+        <svg viewBox="0 0 2400 70" preserveAspectRatio="none" className="footer-wave absolute inset-y-0 left-0 h-full w-[200%] will-change-transform">
           <path d={WAVE} transform="translate(0 16)" fill="#04200f" />
         </svg>
       </div>
@@ -168,7 +174,7 @@ export function Footer() {
                   <span>
                     <span className="block text-lg font-extrabold">واتساب — للطلبات</span>
                     <span className="block text-sm text-cream/60" dir="ltr">
-                      {BRAND.whatsapp.number.replace(/(d{4})(d{3})(d{4})/, '$1 $2 $3')}
+                      {BRAND.whatsapp.number.replace(/(\d{4})(\d{3})(\d{4})/, '$1 $2 $3')}
                     </span>
                   </span>
                 </a>
@@ -203,9 +209,9 @@ export function Footer() {
 
         {/* the wordmark, as a Makka sticker: lime fill, cream outline, hard dark edge */}
         <div className="footer-mark relative mt-20 md:mt-24" aria-hidden>
-          {FLOATERS.map(({ Icon, cls, bob, delay }, n) => (
+          {FLOATERS.map(({ Icon, cls }, n) => (
             <div key={n} className={`footer-fruit absolute z-10 ${cls}`}>
-              <span className="block animate-[bob_var(--bob)_ease-in-out_infinite]" style={{ ['--bob' as string]: bob, animationDelay: delay }}>
+              <span className="footer-bob block will-change-transform" data-n={n}>
                 <Icon className="h-auto w-full drop-shadow-[0_10px_12px_rgba(0,0,0,0.35)]" />
               </span>
             </div>

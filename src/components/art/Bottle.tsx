@@ -11,18 +11,10 @@ import { cn } from '../../lib/utils'
 const VB = { x: 0, y: -60, w: 120, h: 364 }
 const BODY = 'M40 44H80V60C80 68 98 76 100 92V284Q100 298 86 298H34Q20 298 20 284V92C22 76 40 68 40 60Z'
 const CAP = { x: 34, y: 4, w: 52, h: 42 }
-const FIZZ_BOX = { x: 30, w: 60, h: 110 } // from the top of the viewBox down to the mouth
-const FIZZ: Array<[number, number, number]> = [
-  [50, 36, 3.5],
-  [60, 30, 4.5],
-  [70, 36, 3],
-  [55, 24, 2.5],
-  [66, 22, 3],
-]
 
 const pct = (v: number, of: number) => `${(v / of) * 100}%`
 
-export function Bottle({ juice, foam = '#fff8e7', className, n = 0 }: { juice: string; foam?: string; className?: string; n?: number }) {
+export function Bottle({ juice, foam = '#fff8e7', className }: { juice: string; foam?: string; className?: string; n?: number }) {
   const id = useId()
   return (
     <div className={cn('relative', className)}>
@@ -55,23 +47,13 @@ export function Bottle({ juice, foam = '#fff8e7', className, n = 0 }: { juice: s
         <path d="M30 104V270" stroke="#fff" strokeWidth="6" strokeLinecap="round" opacity=".28" />
       </svg>
 
-      <svg
-        viewBox={`${FIZZ_BOX.x} ${VB.y} ${FIZZ_BOX.w} ${FIZZ_BOX.h}`}
-        className="bottle-fizz absolute top-0 h-auto overflow-visible"
-        style={{ left: pct(FIZZ_BOX.x - VB.x, VB.w), width: pct(FIZZ_BOX.w, VB.w) }}
-        aria-hidden
-      >
-        {FIZZ.map(([x, y, r], k) => (
-          <circle key={k} cx={x} cy={y} r={r} fill={k % 2 ? '#fff' : juice} stroke="#fff" strokeWidth="1" opacity="0" />
-        ))}
-      </svg>
 
       <div
         className="bottle-cap absolute will-change-transform"
         style={{ left: pct(CAP.x - VB.x, VB.w), top: pct(CAP.y - VB.y, VB.h), width: pct(CAP.w, VB.w) }}
       >
         {/* idles (bobs) only once the caps are off — the section adds .caps-open */}
-        <div className="in-[.caps-open]:animate-[cap-hover_3.4s_ease-in-out_infinite]" style={{ animationDelay: `${-n * 0.7}s` }}>
+        <div>
           <svg viewBox={`${CAP.x} ${CAP.y} ${CAP.w} ${CAP.h}`} className="block h-auto w-full" aria-hidden>
             <defs>
               <linearGradient id={`${id}cap`} x1="0" y1="0" x2="1" y2="0">

@@ -119,28 +119,6 @@
   text-shadow: 0 var(--st-drop, 0.07em) 0 var(--st-edge, var(--color-forest-900));
 }
 
-/* Liquid text: juice sloshing inside the letters */
-@utility liquid-text {
-  color: transparent;
-  -webkit-text-stroke: 2px var(--color-lime);
-  background-image:
-    /* preserveAspectRatio=none: the tile is stretched to 200% of the text height. Without it the SVG was
-       letter-boxed, leaving an empty band under the wave (the "gap at the bottom" of 17370). */
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='400' viewBox='0 0 240 400' preserveAspectRatio='none'%3E%3Cpath d='M0 200 Q30 180 60 200 T120 200 T180 200 T240 200 V400 H0Z' fill='%23c6f36b'/%3E%3C/svg%3E");
-  background-repeat: repeat-x;
-  background-size: 240px 200%;
-  background-position: 0 var(--fill, 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: liquid-x 3s linear infinite;
-}
-
-@keyframes liquid-x {
-  to {
-    background-position-x: 240px;
-  }
-}
-
 /* SplitText word masks: extra room so Arabic dots and descenders (ي ج ق ر) are never clipped.
    Padding + equal negative margin = bigger clip box, identical layout. */
 .split-word-mask {
@@ -153,19 +131,7 @@
   animation-play-state: paused !important;
 }
 
-/* map city pulse — animates the individual `scale` property so it composes with the Tailwind translate */
-@keyframes pulse-ring {
-  0% {
-    scale: 0.8;
-    opacity: 0.7;
-  }
-  100% {
-    scale: 2.4;
-    opacity: 0;
-  }
-}
-
-/* gentle idle bob for decorative fruit (compositor-only transform) */
+/* gentle bob — only the open mobile menu's fruit use it now (nothing on the page loops by itself) */
 @keyframes bob {
   0%,
   100% {
@@ -187,52 +153,6 @@
   from {
     opacity: 0;
     transform: translateY(16px);
-  }
-}
-
-/* one-shot ring burst (map city reached) */
-@keyframes ring-burst {
-  0% {
-    scale: 0.4;
-    opacity: 0.9;
-  }
-  100% {
-    scale: 3.2;
-    opacity: 0;
-  }
-}
-
-/* scooter exhaust puffs */
-@keyframes puff {
-  0% {
-    transform: translate(0, 0) scale(0.4);
-    opacity: 0.8;
-  }
-  100% {
-    transform: translate(-26px, -8px) scale(1.4);
-    opacity: 0;
-  }
-}
-
-/* a lifted bottle cap hovering over its bottle */
-@keyframes cap-hover {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-3deg);
-  }
-  50% {
-    transform: translateY(-9%) rotate(4deg);
-  }
-}
-
-/* little boat on the map sea */
-@keyframes rock {
-  0%,
-  100% {
-    transform: translateY(0) rotate(-4deg);
-  }
-  50% {
-    transform: translateY(-3px) rotate(4deg);
   }
 }
 
@@ -268,4 +188,14 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
   }
+}
+
+/* the mobile menu's bobbing fruit only animate while the menu is open (they were running closed) */
+.mobile-panel:not([data-open]) * {
+  animation-play-state: paused !important;
+}
+
+/* once the hero has scrolled away, its ~30 sprite layers give their GPU memory back (restored on the way back) */
+.hero-stage.is-idle .will-change-transform {
+  will-change: auto;
 }

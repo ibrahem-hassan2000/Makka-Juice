@@ -168,3 +168,35 @@ User loved the footer's sticker wordmark and the floating fruit of the CTA → s
   scrubbed 360° spin and the +40 % pin length were removed (pin back to +420 %). `?cup=makka` keeps our cup.
 - `tools/shoot.mjs` got burst captures (`name@y*N`) to film timed animations; checked 1440×900 + 390×844, and
   scrolling back up.
+
+## 2026-09-30 — Session 7 (one number)
+- User: the branches' own numbers are no longer used → **every branch = hotline 17370** (card shows «17370 · الخط
+  الساخن», «اتصل» dials 17370). Removed the 3 branch numbers from `data/brand.ts` (and the `phone` field).
+- WhatsApp ordering (01117118333) **stays** — briefly removed, then restored at the user's word (header, mobile
+  menu, 17370 section, "no branch near you" card, footer). Fixed the footer's WhatsApp number formatting (the regex
+  was missing its backslashes, so it never grouped the digits).
+- Dev server (`makka-dev`) went down twice this session — restart it from launch.json before QA shots.
+
+## 2026-09-30 — Session 8 (performance: phones + weak laptops)
+- User: «الموقع كله على الموبايل وبعض اللابات تقيل أوي… حاجات بتتحرك لوحدها عند الفروع… الحركة بطيئة والموضوع صعب».
+- Built measuring tools: `tools/perf.mjs` (phone emulation, CPU throttle, real GPU via `GPU=1`: frames per section,
+  long-frame scripts, idle loops, layers + compositing reasons), `tools/trace.mjs` (time per trace event + paint
+  invalidations with node names), `tools/shoot.mjs` bursts. Findings + rules → docs/04.
+- **Nothing moves by itself**: map ride now scrubbed; removed card nudge, pulsing halo, rocking boat, exhaust puffs,
+  cap hover, bottle fizz, bobbing nav/footer/17370 fruit (footer fruit + wave now drift with the scroll), marquee is
+  scroll-driven, the closed mobile menu no longer animates. Idle: 23 running animations → 0.
+- **No per-frame repaints**: story words reveal once; 17370 fill rebuilt as a transform-only window with a wavy
+  clip-path (the old background-clip fill + slosh loop removed); SVG fizz removed.
+- **content-visibility** on off-screen sections (`lib/offscreen.ts`, measured intrinsic heights → no layout shift):
+  layers 71 → 35.
+- **3D cup**: preloaded during idle after the intro (no more multi-second stall mid-hero), light renderer on phones,
+  skipped on weak devices / Save-Data.
+- **Phones**: hero pin +420 % → +330 % with scrub 0.5; signatures = native swipe row (was ~3,500 px of pinned
+  sideways scrolling); signature cards lost their per-card layers + mask-image + group opacity.
+- Measured (phone, CPU ÷4, Intel HD 530): median frame 50–83 ms → 16.7 ms in hero, marquee, signatures, menu,
+  branches, footer; 33 ms in bottles/17370; story's one-shot intro ~50 ms while it plays. Weak laptop (÷2): 60 fps
+  everywhere except the pinned signatures (~30).
+
+**Left to do**
+- Real-phone check (`npm run build` → `npm run preview` on the LAN) — headless numbers are indicative.
+- User's verdict on the calmer page (no self-moving decoration).

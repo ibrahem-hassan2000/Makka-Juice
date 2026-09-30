@@ -3,7 +3,8 @@ import { Cursor } from './components/layout/Cursor'
 import { Footer } from './components/layout/Footer'
 import { Header } from './components/layout/Header'
 import { Preloader } from './components/layout/Preloader'
-import { initLenis } from './lib/lenis'
+import { initLenis, onReady } from './lib/lenis'
+import { skipOffscreen } from './lib/offscreen'
 import { ScrollTrigger } from './lib/gsap'
 import { Bottles } from './sections/Bottles'
 import { Branches } from './sections/Branches'
@@ -49,7 +50,19 @@ export default function App() {
     ro.observe(main)
     window.addEventListener('scroll', onScroll, { passive: true })
 
+    // once the page has settled (preloader gone, fonts in), off-screen sections stop being rendered
+    let stopSkipping = () => {}
+    let raf = 0
+    const offReady = onReady(() => {
+      document.fonts.ready.then(() => {
+        raf = requestAnimationFrame(() => (stopSkipping = skipOffscreen()))
+      })
+    })
+
     return () => {
+      offReady()
+      cancelAnimationFrame(raf)
+      stopSkipping()
       window.removeEventListener('beforeunload', toTop)
       window.removeEventListener('scroll', onScroll)
       ro.disconnect()

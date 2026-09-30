@@ -8,7 +8,7 @@ import { ArrowUpGlyph, PhoneGlyph, PinGlyph, WhatsAppGlyph } from '../components
 import { SectionHeading } from '../components/ui/SectionHeading'
 import { sticker } from '../components/ui/sticker'
 import { BRANCH_COUNT, BRAND, CITIES, mapsLink, type Branch, type City } from '../data/brand'
-import { gsap, prefersReducedMotion, ScrollTrigger, useGSAP } from '../lib/gsap'
+import { gsap, prefersReducedMotion, useGSAP } from '../lib/gsap'
 import { cn, toArabicDigits } from '../lib/utils'
 
 /* ───────── map geometry (map units; the visible window is VB) ───────── */
@@ -112,12 +112,15 @@ export function Branches() {
       gsap.set(marks, { scale: 0, yPercent: 25, transformOrigin: '50% 100%' })
       gsap.set(badge, { autoAlpha: 0, scale: 0 })
 
+      // the ride is scrubbed by the scroll: nothing on the map moves unless you move the page
       const START = 0.45
       const RIDE = 3.2
       const tl = gsap
-        .timeline({ paused: true })
+        .timeline({
+          defaults: { ease: 'none' },
+          scrollTrigger: { trigger: canvas, start: 'top 85%', end: 'bottom 45%', scrub: 0.5 },
+        })
         .fromTo(rider, { autoAlpha: 0, scale: 0 }, { autoAlpha: 1, scale: 1, duration: 0.45, ease: 'back.out(3)' })
-        .add(() => rider.classList.add('is-riding'), START)
         .to(
           drive,
           {
@@ -134,18 +137,14 @@ export function Branches() {
         // roll off the line and park beside Cairo, then a happy hop
         .add(() => Object.assign(park, { x: pts[N].x, y: pts[N].y, on: true }))
         .to(park, { x: PARKING.x, y: PARKING.y, a: 0, duration: 0.7, ease: 'power2.out', onUpdate: place })
-        .add(() => rider.classList.remove('is-riding'))
         .to('.rider-body', { y: -10, duration: 0.16, yoyo: true, repeat: 1, ease: 'power2.out' })
         .to(badge, { autoAlpha: 1, scale: 1, rotation: -4, duration: 0.6, ease: 'back.out(2.4)' }, '<')
 
-      CITIES.forEach((c, i) => {
+      CITIES.forEach((_, i) => {
         const t = START + at[i] * RIDE
         tl.to(pins[i], { scale: 1, duration: 0.55, ease: 'back.out(3)' }, t)
-          .add(() => q(`[data-pin="${c.id}"] .pin-burst`)[0]?.classList.add('is-hit'), t)
           .to(marks[i], { scale: 1, yPercent: 0, duration: 0.7, ease: 'back.out(2.2)' }, t + 0.08)
       })
-
-      ScrollTrigger.create({ trigger: canvas, start: 'top 75%', once: true, onEnter: () => tl.play() })
 
       // keep the scooter glued to the map when the layout changes size
       const ro = new ResizeObserver(() => {
@@ -245,7 +244,7 @@ export function Branches() {
                 className="pointer-events-none absolute w-[calc(var(--w)*1.35)] -translate-x-1/2 -translate-y-1/2 md:w-(--w)"
                 style={{ left: left(214), top: top(84), ['--w' as string]: wide(40) }}
               >
-                <Boat className="block h-auto w-full animate-[rock_3.2s_ease-in-out_infinite]" />
+                <Boat className="block h-auto w-full" />
               </div>
               {CITIES.map((c) => {
                 const L = LANDMARKS[c.id]
@@ -265,11 +264,11 @@ export function Branches() {
                 )
               })}
 
-              {/* pulse on the selected city (compositor-only `scale`) */}
+              {/* halo on the selected city (static — nothing loops on its own) */}
               <span
                 aria-hidden
                 key={cityId}
-                className="pointer-events-none absolute aspect-square w-[5%] -translate-x-1/2 -translate-y-1/2 animate-[pulse-ring_2.2s_ease-out_infinite] rounded-full bg-lime/45"
+                className="pointer-events-none absolute aspect-square w-[7%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-lime/35"
                 style={{ left: left(city.map.x), top: top(city.map.y) }}
               />
 
@@ -287,7 +286,6 @@ export function Branches() {
                     style={{ left: left(c.map.x), top: top(c.map.y) }}
                   >
                     <span className="pin-pop relative block">
-                      <span aria-hidden className="pin-burst absolute inset-0 rounded-full bg-lime opacity-0 [&.is-hit]:animate-[ring-burst_.9s_ease-out_both]" />
                       <span
                         className={cn(
                           'relative grid size-6 place-items-center rounded-full border-2 border-forest-950 text-[11px] font-extrabold shadow-[0_3px_0_#04200f] transition-[scale,background-color] duration-300 ease-(--ease-squish) md:size-9 md:border-[3px] md:text-sm',
@@ -311,13 +309,6 @@ export function Branches() {
 
               <div aria-hidden className="map-rider pointer-events-none invisible absolute top-0 left-0 z-30 w-[max(9%,38px)] will-change-transform">
                 <div className="rider-body relative">
-                  {[0, 1, 2].map((k) => (
-                    <span
-                      key={k}
-                      className="absolute bottom-[20%] left-[-2%] size-[22%] rounded-full bg-cream/80 opacity-0 in-[.is-riding]:animate-[puff_.7s_ease-out_infinite]"
-                      style={{ animationDelay: `${k * 0.23}s` }}
-                    />
-                  ))}
                   <Scooter className="relative block h-auto w-full" />
                 </div>
               </div>
@@ -416,24 +407,6 @@ function BranchCarousel({ city }: { city: City }) {
     return () => ro.disconnect()
   }, [city.id])
 
-  // first time the row shows up: the cards nudge sideways once, so it's obvious there is more to swipe
-  useGSAP(
-    () => {
-      if (prefersReducedMotion()) return
-      ScrollTrigger.create({
-        trigger: track.current,
-        start: 'top 85%',
-        once: true,
-        onEnter: () => {
-          const el = track.current!
-          if (el.scrollWidth - el.clientWidth < 8) return
-          gsap.to(el.children, { x: -44, duration: 0.45, ease: 'power2.out', yoyo: true, repeat: 1, stagger: 0.04, delay: 0.3 })
-        },
-      })
-    },
-    { scope: track },
-  )
-
   const step = (dir: 1 | -1) => {
     const el = track.current!
     const card = el.querySelector('li')
@@ -519,8 +492,8 @@ function BranchCard({ branch: b, city, n }: { branch: Branch; city: City; n: num
       <p className="mt-1 line-clamp-2 min-h-[2lh] text-sm leading-relaxed text-forest-900/65">{b.address}</p>
       <p className="mt-3 flex items-center gap-2 text-sm font-bold text-forest-900/80">
         <PhoneGlyph />
-        <span dir="ltr">{b.phone ?? BRAND.hotline}</span>
-        {!b.phone && <span className="text-xs text-forest-900/45">الخط الساخن</span>}
+        <span dir="ltr">{BRAND.hotline}</span>
+        <span className="text-xs text-forest-900/45">الخط الساخن</span>
       </p>
       {/* same two actions on every card, pinned to the bottom so all cards line up */}
       <div className="mt-auto pt-4">
@@ -529,7 +502,7 @@ function BranchCard({ branch: b, city, n }: { branch: Branch; city: City; n: num
             <PinGlyph />
             الاتجاهات
           </a>
-          <a href={`tel:${b.phone ?? BRAND.hotline}`} className={btn('dark', 'sm')} aria-label={`اتصل بفرع ${b.name}`}>
+          <a href={`tel:${BRAND.hotline}`} className={btn('dark', 'sm')} aria-label={`اتصل بالخط الساخن ${BRAND.hotline} — فرع ${b.name}`}>
             <PhoneGlyph />
             اتصل
           </a>

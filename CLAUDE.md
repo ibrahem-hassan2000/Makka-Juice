@@ -13,6 +13,8 @@ Spec pitch site for an Alexandria juice chain. Not approved by the client yet. *
 - Anything that changes page height is picked up by the ResizeObserver in App.tsx → `ScrollTrigger.refresh()`.
 - Perf: nothing inside onUpdate may measure (no DrawSVG `gsap.set` per frame, `getPointAtLength`, `clientWidth`) —
   sample once, cache sizes in a ResizeObserver. Animate HTML layers over static SVG. Rules in docs/04.
+- Nothing loops or plays by itself (user rule) and nothing repaints per scroll frame; off-screen sections skip
+  rendering via `lib/offscreen.ts`. Measure phones with `GPU=1 node tools/perf.mjs 390x844 4` (docs/04).
 - Display type = Makka sticker (`sticker()` from `components/ui/sticker.ts`); fruit decoration = `ui/Floaters`.
 - Sticky UI uses `top-(--nav-offset)`; Header sets `html[data-nav]`.
 - Don't invent brand facts; mark placeholders. Update `docs/08-changelog.md` at the end of every session.

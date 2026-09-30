@@ -33,7 +33,8 @@ export function Bottles() {
         )
       })
 
-      // the caps unscrew (wiggle), pop up and stay hovering over their bottles; a little fizz escapes.
+      // the caps unscrew (wiggle), pop up and stay hovering over their bottles. (The SVG fizz was removed: moving
+      // SVG circles repainted the bottle every frame.)
       // Scrubbed, so scrolling back screws them on again. Caps are HTML layers (see Bottle.tsx) → no repaints.
       const el = root.current!
       const caps = gsap.timeline({
@@ -51,14 +52,11 @@ export function Bottles() {
       gsap.utils.toArray<HTMLElement>('.bottle-cap').forEach((cap, n) => {
         const t = n * 0.18
         const side = n % 2 ? 1 : -1
-        const fizz = cap.parentElement!.querySelectorAll('.bottle-fizz circle')
         caps
           .to(cap, { rotation: -9 * side, transformOrigin: '50% 100%', duration: 0.18 }, t)
           .to(cap, { rotation: 7 * side, duration: 0.18 }, t + 0.18)
           .to(cap, { yPercent: -185, xPercent: 20 * side, rotation: 26 * side, duration: 0.5 }, t + 0.36)
           .to(cap, { yPercent: -150, xPercent: 14 * side, rotation: 12 * side, duration: 0.4, ease: 'sine.inOut' }, t + 0.86)
-          .fromTo(fizz, { y: 12, scale: 0.4, opacity: 0 }, { y: -26, scale: 1, opacity: 0.95, stagger: 0.04, duration: 0.35, transformOrigin: '50% 50%' }, t + 0.4)
-          .to(fizz, { y: -52, opacity: 0, stagger: 0.04, duration: 0.3, ease: 'power1.in' }, t + 0.75)
       })
 
       // the words behind the bottles run as one clean continuous band

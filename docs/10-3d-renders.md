@@ -45,7 +45,11 @@ and its surface ellipse rises with it, scaling with the cup's taper (`surfaceSca
 ### The live spin — "the cup becomes real" (hero finale)
 User's idea (2026-09-29): once the toppings are in, the built cup spins very fast and turns into the real one
 without the change showing. `lib/cup3d.ts` (lazy chunk: three.js + GLTFLoader + MeshoptDecoder, ~160 KB gzip) is
-imported once the hero is 20 % through (skipped on Save-Data and reduced motion). It loads **both** cups and rebuilds
+fetched, compiled and drawn once (hidden) in an idle callback right after the hero intro — so its one-time cost
+(seconds on a throttled phone) never lands mid-scroll; the 20 %-of-hero trigger is only a fallback. Phones/tablets
+(coarse pointer or < 768 px) get a **light renderer**: no shadow maps, no transmission pass (the wall becomes plain
+transparent plastic, condensation hidden), pixel ratio ≤ 1.5. Weak devices (deviceMemory < 4, < 4 cores), Save-Data
+and reduced motion keep the sprites (no spin). It loads **both** cups and rebuilds
 the studio camera, softbox environment and lights from `hero-cup.json`, so at yaw 0 our WebGL cup matches the
 sprites. The finale plays a **timed** 4-turn spin (1.4 s, power3.inOut — never slow, whatever the scroll speed):
 - turns 0.9 → 2: our cup eases into the real cup's size (×1.08) and proportions (rim height/radius 2.33 → 1.87,

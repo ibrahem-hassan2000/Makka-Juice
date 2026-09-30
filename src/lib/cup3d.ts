@@ -58,18 +58,27 @@ function studioScene() {
 /**
  * @param pad the canvas is bigger than the cup box by this factor (x, y) so the straw / garnish never clip while
  *   turning; the camera widens by the same amount, keeping the cup exactly where the sprites were.
+ * @param lite phones / tablets: no shadow maps, no transmission (the extra render pass), no condensation,
+ *   pixel ratio ≤ 1.5 — the cup is on screen for a 1.4 s blurred spin, the difference doesn't show.
  */
-export async function createCup3D(canvas: HTMLCanvasElement, finale: Finale = 'real', pad: [number, number] = [1, 1], spinTurns = 4) {
+export async function createCup3D(
+  canvas: HTMLCanvasElement,
+  finale: Finale = 'real',
+  pad: [number, number] = [1, 1],
+  spinTurns = 4,
+  lite = false,
+) {
   // the swap happens at the fastest moment of an inOut spin (half way); our cup morphs just before it
   const swapAt = spinTurns / 2
   const morphFrom = swapAt * 0.45
   const rig = HERO_CUP as unknown as Rig
-  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true, powerPreference: 'high-performance' })
+  const dpr = Math.min(lite ? 1.5 : 2, window.devicePixelRatio || 1)
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !lite || dpr < 1.5, powerPreference: 'high-performance' })
   renderer.setClearColor(0x000000, 0)
   renderer.toneMapping = THREE.NeutralToneMapping
   renderer.toneMappingExposure = rig.lights.exposure
   renderer.outputColorSpace = THREE.SRGBColorSpace
-  renderer.shadowMap.enabled = true
+  renderer.shadowMap.enabled = !lite
   renderer.shadowMap.type = THREE.PCFShadowMap
 
   const scene = new THREE.Scene()
@@ -92,7 +101,7 @@ export async function createCup3D(canvas: HTMLCanvasElement, finale: Finale = 'r
     }
     scene.add(l, l.target)
   }
-  light(rig.lights.key, 0xfff3e3, true)
+  light(rig.lights.key, 0xfff3e3, !lite)
   light(rig.lights.rim, 0xffffff)
   light(rig.lights.fill, 0xfff8f0)
 
@@ -117,8 +126,17 @@ export async function createCup3D(canvas: HTMLCanvasElement, finale: Finale = 'r
     if (!m.isMesh) return
     const mat = m.material as THREE.MeshPhysicalMaterial
     const glassy = mat.transmission > 0 || mat.transparent
-    m.castShadow = !glassy
-    m.receiveShadow = !glassy
+    m.castShadow = !lite && !glassy
+    m.receiveShadow = !lite && !glassy
+    if (lite && mat.transmission > 0) {
+      // condensation drops would read as white dots without refraction; the wall becomes plain clear plastic
+      if ((m as THREE.InstancedMesh).isInstancedMesh) m.visible = false
+      mat.transmission = 0
+      mat.transparent = true
+      mat.opacity = 0.16
+      mat.depthWrite = false
+      mat.needsUpdate = true
+    }
   })
   scene.add(pivot)
   await renderer.compileAsync(scene, camera)
@@ -143,7 +161,7 @@ export async function createCup3D(canvas: HTMLCanvasElement, finale: Finale = 'r
   return {
     /** css size of the cup box; the drawing buffer follows the device pixel ratio (capped at 2) */
     setSize(w: number, h: number) {
-      renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1))
+      renderer.setPixelRatio(dpr)
       renderer.setSize(w, h, false)
       dirty = true
       draw()

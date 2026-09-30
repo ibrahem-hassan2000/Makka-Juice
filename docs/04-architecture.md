@@ -48,7 +48,34 @@ src/
 - Animations touch transform / opacity (+ CSS vars for the liquid text). Idle loops pause off-screen.
 - `prefers-reduced-motion`: no pins/scrub, final states shown.
 
+### Measuring (dev tools in `tools/`, run against `npm run preview` on :4173 or dev on :5190)
+```bash
+GPU=1 SITE=http://localhost:4173/ node tools/perf.mjs 390x844 4      # phone, CPU ÷4, real GPU: frames per section,
+                                                                      # long-frame scripts, idle loops, layers
+GPU=1 SITE=http://localhost:4173/ node tools/trace.mjs "#order" 390x844 4   # where frame time goes + who repaints
+node tools/shoot.mjs <dir> 390x844 name@#menu hero@hero:0.5 spin@hero:0.93*16   # screenshots (dev server only)
+```
+`INJECT_CSS='…'` on perf.mjs tries a stylesheet before measuring (how the content-visibility win was found).
+
+### What the 2026-09-30 audit found (phone, CPU ÷4, Intel HD 530)
+- Most frame time was **Layerize** (Chrome re-assigning every paint chunk of the whole page to layers) — it runs
+  whenever anything repaints, and costs more the longer/heavier the page. Fixes: (1) **off-screen sections skip
+  rendering** — `lib/offscreen.ts` sets `content-visibility: auto` + a measured `contain-intrinsic-block-size` on
+  story/menu/bottles/branches/order after READY (page height unchanged to the pixel), layers 71 → 35;
+  (2) **no per-frame repaints while scrolling** — story words reveal once instead of scrubbing, the 17370 fill is a
+  transform-only window, the SVG bottle fizz is gone.
+- **Nothing loops**: 23 infinite animations were running while idle (bobbing fruit, cap hover, pulsing map, boat,
+  footer wave, marquee, hidden 17370 slosh, the closed mobile menu) → 0.
+- The live 3D cup cost ~5 s of main thread (throttled) in the middle of the hero scroll → now fetched/compiled/drawn
+  during idle after the intro; light renderer on phones (no shadows/transmission, DPR ≤ 1.5); skipped on weak
+  devices (deviceMemory < 4, < 4 cores, Save-Data).
+- Result: 60 fps median in hero, marquee, signatures, menu, branches, footer; ~30 in bottles/17370 (throttled phone).
+
 Rules learned by measuring (prod build, mobile emulation — see 08 for numbers):
+- **Nothing may repaint every frame while scrolling** (text opacity/colour, background-position, SVG attributes,
+  clip-path changes): each repaint makes Chrome re-layerize the page. Animate transform/opacity on layers only.
+- **No infinite loops**; ambient motion must be scroll- or interaction-driven (and paused off-screen).
+- Long sections go in `lib/offscreen.ts`'s list (not pinned ones, not ones whose decoration overflows their box).
 - Anything animated gets its own layer and only changes transform/opacity: map pins/landmarks/scooter and bottle
   caps are HTML layers over static SVG; floaters/cards/juicy digits have `will-change: transform`.
 - Nothing per frame may re-measure: no `getPointAtLength` / DrawSVG re-init / `clientWidth` inside onUpdate
